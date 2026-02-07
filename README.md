@@ -95,4 +95,4 @@ Built for Brainstrom.exe Hackathon 2024
 
 ## 🙏 Acknowledgments
 
-Special thanks to Wright State University and the Brainstrom.exe Hackathon organizers!
+Special thanks to Wright State University and Make-It_Wright Hackathon organizers!
