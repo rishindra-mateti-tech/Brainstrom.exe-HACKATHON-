@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CUTIeS-IQ 🧴✨
 
-## Getting Started
+**AI-Powered Skincare Intelligence Platform**
 
-First, run the development server:
+CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product ingredients based on your unique skin profile, climate, and personal skincare goals. Built for the Brainstrom.exe Hackathon.
 
+## 🌟 Features
+
+### Core Functionality
+- **🔍 OCR Ingredient Analysis** - Upload product photos and extract ingredient lists automatically
+- **🎯 Priority-Based Goals** - Set up to 3 priority levels for your skincare objectives
+- **🧠 Smart Recommendations** - AI-powered suitability scoring based on your profile
+- **📊 History Tracking** - Track and compare products you've analyzed
+- **⚠️ Allergy Alerts** - Automatic flagging of ingredients you're sensitive to
+- **🌡️ Climate Intelligence** - Personalized recommendations based on your environment
+
+### Advanced Features
+- **Ingredient Memory** - Learn from your past reactions to specific ingredients
+- **Goal Effectiveness Scoring** - See how well products align with each priority goal
+- **Priority Weighting** - P1 (50%), P2 (37%), P3 (13%) for precise product evaluation
+- **Dark/Light Mode** - Beautiful pink/white light theme and cyan dark theme
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **OCR**: Tesseract.js
+- **UI Components**: shadcn/ui
+- **Animations**: Framer Motion
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and npm
+- Supabase account
+
+### Installation
+
+1. **Clone the repository**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/rishindra-mateti-tech/Brainstrom.exe-HACKATHON-.git
+cd CutisIQ
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install dependencies**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Environment Setup**
+Create `.env.local` file:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Run development server**
+```bash
+npm run dev
+```
 
-## Learn More
+Visit `http://localhost:3000`
 
-To learn more about Next.js, take a look at the following resources:
+## 📦 Database Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The app uses Supabase with the following tables:
+- `profiles` - User skin profiles
+- `product_history` - Analysis history
+- `allergies` - User allergen tracking
+- `ingredient_feedback` - Reaction memory
+- `user_goals` - Priority-based goals
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🎨 UI Design
 
-## Deploy on Vercel
+- **Light Mode**: Clean white/gray with pink accents
+- **Dark Mode**: Slate-900 → Blue-950 gradient with cyan accents
+- **Theme**: Matches homepage branding with modern glassmorphism effects
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🏆 Hackathon Team
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Hack Squad** - Location: Russ 158
+
+1. Rishindra Mateti - [mateti.7@wright.edu](mailto:mateti.7@wright.edu)
+2. Lohitha Donuri - [lohith.3@wright.edu](mailto:lohith.3@wright.edu)
+3. Akanksha Padigapati - [padigapati.2@wright.edu](mailto:padigapati.2@wright.edu)
+4. Varshitha Chennu - [chennu.9@wright.edu](mailto:chennu.9@wright.edu)
+5. Mohith Kovvuri - [kovvuri.6@wright.edu](mailto:kovvuri.6@wright.edu)
+
+## 📄 License
+
+Built for Brainstrom.exe Hackathon 2024
+
+## 🙏 Acknowledgments
+
+Special thanks to Wright State University and the Brainstrom.exe Hackathon organizers!
