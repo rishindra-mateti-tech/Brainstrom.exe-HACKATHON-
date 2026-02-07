@@ -91,7 +91,7 @@ The app uses Supabase with the following tables:
 
 ## 📄 License
 
-Built for Brainstrom.exe Hackathon 2024
+Built for Make - It - Wright hackathon 2026
 
 ## 🙏 Acknowledgments
 
