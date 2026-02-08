@@ -182,7 +182,6 @@ export default function Dashboard() {
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <Logo />
-                        <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full font-black animate-pulse">DEBUG: V2</span>
                         {userName && (
                             <span className="text-lg font-semibold text-[hsl(var(--primary))]">
                                 Welcome {userName}
@@ -358,14 +357,19 @@ export default function Dashboard() {
 
                                     {/* Bottom Section: Holistic Verdict & Recommendations */}
                                     <div className="pt-12 border-t-4 border-double border-teal-100/50">
-                                        <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden group">
-                                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                                                <Sparkles size={120} />
+                                        <div className="bg-white dark:bg-slate-900 border-2 border-[hsl(var(--primary)/0.2)] dark:border-cyan-900/50 p-8 rounded-3xl shadow-xl relative overflow-hidden group">
+                                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
+                                                <Sparkles size={120} className="text-[hsl(var(--primary))]" />
                                             </div>
-                                            <h3 className="text-2xl font-black mb-4 relative z-10 text-cyan-400">Holistic Verdict</h3>
-                                            <p className="text-xl leading-relaxed font-medium relative z-10 text-slate-100">
-                                                {result.explanation}
-                                            </p>
+                                            <h3 className="text-2xl font-black mb-4 relative z-10 text-[hsl(var(--primary))] dark:text-cyan-400">Holistic Verdict</h3>
+                                            <div className="text-lg leading-relaxed font-medium relative z-10 text-slate-900 dark:text-slate-100 space-y-4">
+                                                <p>
+                                                    Your product suitability score is <span className="text-orange-600 dark:text-orange-400 font-bold">{result.suitabilityScore}</span> ({result.suitabilityScore >= 80 ? 'safe for your skin' : result.suitabilityScore >= 50 ? 'caution advised' : 'not recommended'}) and your overall goal-based score is <span className="text-pink-600 dark:text-cyan-400 font-bold">{result.goalScore}</span> ({result.goalScore >= 80 ? 'highly effective' : result.goalScore >= 50 ? 'moderately effective' : 'not very effective'}) for your goals.
+                                                </p>
+                                                <p className="text-slate-600 dark:text-slate-400 text-base font-normal">
+                                                    {result.explanation}
+                                                </p>
+                                            </div>
                                         </div>
 
                                         <div className="mt-8 grid gap-4">

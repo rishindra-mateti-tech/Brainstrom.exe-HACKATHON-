@@ -15,16 +15,6 @@ export function PersonalizedInsights({ insights, extractedIngredients, skinType 
 
     return (
         <div className="space-y-4">
-            {/* Extracted Ingredients Header */}
-            <div className="p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border-2 border-teal-100 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <Sparkles size={18} className="text-teal-600" />
-                    📋 Ingredients Detected
-                </h3>
-                <p className="text-sm text-gray-700 font-mono">
-                    {extractedIngredients.join(', ')}
-                </p>
-            </div>
 
             {/* Personalized Insights */}
             {skinType && (
