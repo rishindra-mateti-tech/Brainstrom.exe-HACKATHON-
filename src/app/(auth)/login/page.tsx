@@ -41,6 +41,11 @@ export default function LoginPage() {
     };
 
     const handleOAuth = async (provider: 'google' | 'facebook' | 'apple' | 'azure') => {
+        if (provider !== 'google') {
+            setError(`${provider === 'azure' ? 'Microsoft' : provider.charAt(0).toUpperCase() + provider.slice(1)} login is coming soon! Please continue with Google for now.`);
+            return;
+        }
+
         try {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
