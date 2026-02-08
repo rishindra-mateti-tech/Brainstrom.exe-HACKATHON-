@@ -37,6 +37,9 @@ export interface EnhancedAnalysisResult extends AnalysisResult {
     personalizedInsights: PersonalizedInsight[];
     goalEffectiveness?: GoalEffectiveness[];
     recommendations: ProductRecommendation[];
+    suitabilityScore: number;
+    suitabilityExplanation: string;
+    goalScore: number;
 }
 
 export interface UserGoal {
@@ -66,7 +69,7 @@ export const analyzeIngredientsWithGoals = (
 
     // Calculate goal effectiveness if goals are set
     let goalEffectiveness: GoalEffectiveness[] | undefined;
-    let finalScore = baseAnalysis.score;
+    let goalScore = 0;
 
     if (userGoals.length > 0) {
         goalEffectiveness = userGoals.map(goal => calculateGoalEffectiveness(
@@ -75,16 +78,12 @@ export const analyzeIngredientsWithGoals = (
             userProfile?.skin_type
         ));
 
-        // Recalculate score based on priority weighting if in priority mode
+        // Calculate goal-specific score based on priority weighting
         if (priorityMode && goalEffectiveness.length > 0) {
-            finalScore = calculatePriorityWeightedScore(
-                goalEffectiveness,
-                baseAnalysis.score
-            );
+            goalScore = calculatePriorityWeightedScore(goalEffectiveness);
         } else if (goalEffectiveness.length > 0) {
             // Simple mode: average all goals equally
-            const avgGoalScore = goalEffectiveness.reduce((sum, g) => sum + g.score, 0) / goalEffectiveness.length;
-            finalScore = Math.round((avgGoalScore * 0.8) + (baseAnalysis.score * 0.2));
+            goalScore = Math.round(goalEffectiveness.reduce((sum, g) => sum + g.score, 0) / goalEffectiveness.length);
         }
     }
 
@@ -95,24 +94,30 @@ export const analyzeIngredientsWithGoals = (
         goalEffectiveness
     );
 
-    // Update explanation based on FINAL score (crucial fix)
-    let explanation = "";
-    if (finalScore >= 80) {
-        explanation = "Excellent match! This product aligns very well with your skin profile.";
-    } else if (finalScore >= 60) {
-        explanation = "Good choice. This product should work well for you with minor considerations.";
-    } else if (finalScore >= 40) {
-        explanation = "Acceptable. This product has some ingredients you might want to monitor.";
-    } else if (finalScore >= 20) {
-        explanation = "⚠️ Caution: This product has several conflicts with your skin profile or history.";
-    } else {
-        explanation = "❌ Not recommended. This product contains multiple problematic ingredients for your skin.";
-    }
+    // Generate goal-specific explanation
+    const getGoalVerdict = (score: number) => {
+        if (score >= 80) return "excellent for your goals";
+        if (score >= 60) return "good for your goals";
+        if (score >= 40) return "okay for your goals";
+        return "not very effective for your goals";
+    };
+
+    const getSuitabilityVerdict = (score: number) => {
+        if (score >= 80) return "perfect for your skin";
+        if (score >= 60) return "safe for your skin";
+        if (score >= 40) return "tolerable for your skin";
+        return "risky for your skin";
+    };
+
+    const holisticExplanation = `Your product suitability score is ${baseAnalysis.score} (${getSuitabilityVerdict(baseAnalysis.score)}) and your overall goal-based score is ${goalScore} (${getGoalVerdict(goalScore)}).`;
 
     return {
         ...baseAnalysis,
-        score: finalScore,
-        explanation: explanation, // Override base explanation with new score-based one
+        score: goalScore,
+        suitabilityScore: baseAnalysis.score,
+        suitabilityExplanation: baseAnalysis.explanation,
+        goalScore: goalScore,
+        explanation: holisticExplanation, // This is now the combined holistic verdict
         extractedIngredients,
         personalizedInsights,
         goalEffectiveness,
@@ -209,42 +214,54 @@ function calculateGoalEffectiveness(
 
 
 function calculatePriorityWeightedScore(
-    goalEffectiveness: GoalEffectiveness[],
-    baseScore: number
+    goalEffectiveness: GoalEffectiveness[]
 ): number {
     // Dynamic priority weights based on how many priorities are set
-    // 3 priorities: P1=50%, P2=37%, P3=13%
-    // 2 priorities: P1=60%, P2=40%
-    // 1 priority: P1=100%
+    // 3 priorities: P1=50%, P2=37%, P3=13% (shared)
+    // 2 priorities: Top=60%, Bottom=40%
+    // 1 priority: 100%
 
-    const uniquePriorities = [...new Set(goalEffectiveness.map(g => g.priority))].sort();
-    const numPriorities = uniquePriorities.length;
+    // Get unique priority levels present
+    const priorities = [...new Set(goalEffectiveness.map(g => g.priority))].sort();
+    const numPriorities = priorities.length;
 
-    let weights: { [key: number]: number } = {};
-
-    if (numPriorities === 3) {
-        weights = { 1: 0.50, 2: 0.37, 3: 0.13 };
-    } else if (numPriorities === 2) {
-        weights = { 1: 0.60, 2: 0.40 };
-    } else {
-        weights = { 1: 1.0 };
-    }
+    if (numPriorities === 0) return 0;
 
     let weightedSum = 0;
 
-    // Calculate weighted sum: sum(score × weight) for each priority
-    goalEffectiveness.forEach(ge => {
-        const weight = weights[ge.priority] || 0;
-        weightedSum += ge.score * weight;
-    });
+    if (numPriorities === 3) {
+        // P1=50, P2=37, P3=13
+        const p1Goals = goalEffectiveness.filter(g => g.priority === 1);
+        const p1AvgScore = p1Goals.length > 0 ? p1Goals.reduce((sum, g) => sum + g.score, 0) / p1Goals.length : 0;
 
-    // The weighted sum IS the final score (no division needed in weighted average)
-    const goalScore = Math.round(weightedSum);
+        const p2Goals = goalEffectiveness.filter(g => g.priority === 2);
+        const p2AvgScore = p2Goals.length > 0 ? p2Goals.reduce((sum, g) => sum + g.score, 0) / p2Goals.length : 0;
 
-    // Blend goal score (80%) with base compatibility score (20%) for safety checks
-    const finalScore = Math.round((goalScore * 0.8) + (baseScore * 0.2));
+        const p3Goals = goalEffectiveness.filter(g => g.priority === 3);
+        const p3AvgScore = p3Goals.length > 0
+            ? p3Goals.reduce((sum, g) => sum + g.score, 0) / p3Goals.length
+            : 0;
 
-    return Math.max(0, Math.min(100, finalScore));
+        weightedSum = (p1AvgScore * 0.50) + (p2AvgScore * 0.37) + (p3AvgScore * 0.13);
+    }
+    else if (numPriorities === 2) {
+        // Highest priority gets 60%, lowest gets 40%
+        const highP = priorities[0];
+        const highGoals = goalEffectiveness.filter(g => g.priority === highP);
+        const highAvg = highGoals.reduce((sum, g) => sum + g.score, 0) / highGoals.length;
+
+        const lowP = priorities[1];
+        const lowGoals = goalEffectiveness.filter(g => g.priority === lowP);
+        const lowAvg = lowGoals.reduce((sum, g) => sum + g.score, 0) / lowGoals.length;
+
+        weightedSum = (highAvg * 0.60) + (lowAvg * 0.40);
+    }
+    else {
+        // Only 1 priority level present (could be level 1, 2, or 3)
+        weightedSum = goalEffectiveness.reduce((sum, g) => sum + g.score, 0) / goalEffectiveness.length;
+    }
+
+    return Math.round(weightedSum);
 }
 
 function generateRecommendations(

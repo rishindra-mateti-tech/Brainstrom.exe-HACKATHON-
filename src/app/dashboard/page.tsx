@@ -7,19 +7,24 @@ import { Logo } from '@/components/ui/Logo';
 import { extractIngredients } from '@/lib/analysis/ocr';
 import { analyzeIngredients, AnalysisResult } from '@/lib/analysis/analyzer';
 import {
-    Camera,
+    LayoutDashboard,
     History,
+    User,
+    Settings,
+    LogOut,
+    Sparkles,
+    ChevronRight,
+    Loader2,
+    Clock,
+    ChevronDown,
     AlertCircle,
     CheckCircle,
-    Cloud,
-    LogOut,
-    Upload,
-    Brain,
-    Search,
-    ChevronRight,
-    Sparkles,
+    Target as TargetIcon,
     Sun,
-    Moon
+    Moon,
+    Cloud,
+    Brain,
+    Camera
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { GoalsSelector } from '@/components/dashboard/GoalsSelector';
@@ -50,6 +55,7 @@ export default function Dashboard() {
 
     // Expanded history item state
     const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
+    const [resetToken, setResetToken] = useState(0);
 
     useEffect(() => {
         fetchData();
@@ -141,15 +147,22 @@ export default function Dashboard() {
             );
 
             setResult(analysis);
+            setProductName('');
 
             // Save to history
             await supabase.from('product_history').insert({
                 profile_id: profile.id,
                 product_name: productName || 'Unknown Product',
                 ingredients: ingredientText,
-                suitability_score: analysis.score,
+                suitability_score: analysis.suitabilityScore,
+                goal_score: analysis.goalScore,
                 explanation: analysis.explanation
             });
+
+            // RESET GOALS after analysis
+            await supabase.from('skincare_goals').delete().eq('profile_id', profile.id);
+            setUserGoals([]);
+            setResetToken(t => t + 1);
 
             fetchData(); // Refresh history
         } catch (err: any) {
@@ -169,6 +182,7 @@ export default function Dashboard() {
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <Logo />
+                        <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full font-black animate-pulse">DEBUG: V2</span>
                         {userName && (
                             <span className="text-lg font-semibold text-[hsl(var(--primary))]">
                                 Welcome {userName}
@@ -202,6 +216,7 @@ export default function Dashboard() {
                     {/* Goals Selector */}
                     <Card className="border border-gray-200 dark:border-cyan-900 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 p-8 shadow-md dark:shadow-none hover:shadow-lg transition-all duration-300">
                         <GoalsSelector
+                            key={resetToken}
                             profileId={profile?.id}
                             onGoalsChange={(goals, mode) => {
                                 setUserGoals(goals);
@@ -277,82 +292,119 @@ export default function Dashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="mt-12 p-8 rounded-3xl bg-gradient-to-br from-white via-teal-50/20 to-cyan-50/20 dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 border-2 border-teal-100 dark:border-cyan-900/30 shadow-xl"
                             >
-                                <div className="flex flex-col md:flex-row gap-8">
-                                    <div className="flex flex-col items-center justify-center">
-                                        <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-3xl font-bold ${result.score >= 80 ? 'border-green-500 text-green-600' :
-                                            result.score >= 50 ? 'border-amber-500 text-amber-600' : 'border-red-500 text-red-600'
-                                            }`}>
-                                            {result.score}
-                                        </div>
-                                        <span className="mt-2 text-sm font-semibold uppercase tracking-wider text-gray-600 dark:text-cyan-200">Suitability</span>
-                                    </div>
-
-                                    <div className="flex-1 space-y-6">
-                                        <div>
-                                            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-cyan-100">Verdict</h3>
-                                            <p className="text-gray-700 dark:text-cyan-200 leading-relaxed">
-                                                {result.explanation}
-                                            </p>
+                                <div className="space-y-12">
+                                    {/* Top Section: Suitability & Ingredients */}
+                                    <div className="flex flex-col md:flex-row gap-8 items-start">
+                                        {/* Suitability Gauge */}
+                                        <div className="flex flex-col items-center justify-center p-6 bg-white dark:bg-cyan-950/20 rounded-2xl border border-teal-100/50 min-w-[200px] shadow-inner">
+                                            <div className={`w-36 h-36 rounded-full border-[12px] flex flex-col items-center justify-center font-black ${result.suitabilityScore >= 80 ? 'border-green-500 text-green-600' :
+                                                result.suitabilityScore >= 50 ? 'border-amber-500 text-amber-600' : 'border-red-500 text-red-600'
+                                                }`}>
+                                                <span className="text-5xl">{result.suitabilityScore}</span>
+                                                <span className="text-xs uppercase tracking-widest mt-1 opacity-60">Base</span>
+                                            </div>
+                                            <span className="mt-3 text-[12px] font-black uppercase tracking-[0.4em] text-gray-500">Suitability</span>
                                         </div>
 
-                                        {/* Enhanced Results - Goals & Insights */}
-                                        {result.personalizedInsights && result.personalizedInsights.length > 0 && (
-                                            <div className="mt-6">
+                                        <div className="flex-1 space-y-4">
+                                            {/* Detected Ingredients - Reusing same component pattern */}
+                                            <div className="p-6 rounded-2xl bg-teal-50/50 dark:bg-cyan-900/20 border border-teal-100 dark:border-cyan-900/30">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <span className="text-xl">🧬</span>
+                                                    <h3 className="font-bold text-slate-800 dark:text-cyan-200">Ingredients Detected</h3>
+                                                </div>
+                                                <p className="text-sm font-mono text-slate-600 dark:text-cyan-400 break-words leading-relaxed">
+                                                    {result.extractedIngredients.join(', ')}
+                                                </p>
+                                            </div>
+
+                                            {/* Personalized Highlights for Skin Type */}
+                                            {result.personalizedInsights && result.personalizedInsights.length > 0 && (
                                                 <PersonalizedInsights
                                                     insights={result.personalizedInsights}
                                                     extractedIngredients={result.extractedIngredients || []}
                                                     skinType={profile?.skin_type}
                                                 />
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
+                                    </div>
 
-                                        {/* Priority-Based Breakdown */}
-                                        {result.goalEffectiveness && result.goalEffectiveness.length > 0 && (
-                                            <div className="mt-6 pt-6 border-t">
+                                    {/* Mid Section: Priority Breakdown & Goal Score */}
+                                    <div className="pt-12 border-t border-teal-100/30">
+                                        <div className="flex flex-col lg:flex-row gap-8 items-start">
+                                            <div className="flex-1 w-full">
+                                                <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[hsl(var(--primary))] uppercase tracking-tighter">
+                                                    <Brain size={24} />
+                                                    Personalized Goal Impact
+                                                </h3>
                                                 <PriorityBreakdown
-                                                    goalEffectiveness={result.goalEffectiveness}
+                                                    goalEffectiveness={result.goalEffectiveness || []}
                                                     priorityMode={priorityMode}
                                                 />
                                             </div>
-                                        )}
 
-                                        {/* Product Recommendations */}
-                                        {result.recommendations && result.recommendations.length > 0 && (
-                                            <ProductRecommendations recommendations={result.recommendations} />
-                                        )}
-
-                                        {/* Ingredient Categories */}
-                                        <div className="grid gap-3">
-                                            {result.warnings.map((w, i) => (
-                                                <div key={i} className="flex gap-3 p-3 rounded-xl bg-red-50 text-red-700 text-sm border border-red-100">
-                                                    <AlertCircle size={18} className="shrink-0" />
-                                                    {w}
+                                            {/* Overall Goal Gauge */}
+                                            <div className="flex flex-col items-center justify-center p-8 bg-[hsl(var(--primary)/0.03)] border-4 border-[hsl(var(--primary)/0.2)] rounded-3xl min-w-[240px] shadow-lg">
+                                                <div className={`w-40 h-40 rounded-full border-[14px] flex flex-col items-center justify-center font-black ${result.goalScore >= 80 ? 'border-[hsl(var(--primary))] text-[hsl(var(--primary))]' :
+                                                    result.goalScore >= 50 ? 'border-amber-500 text-amber-600' : 'border-red-500 text-red-600'
+                                                    }`}>
+                                                    <span className="text-6xl">{result.goalScore}</span>
+                                                    <span className="text-xs uppercase tracking-widest mt-1 opacity-60">Result</span>
                                                 </div>
-                                            ))}
-                                            {result.highlights.map((h, i) => (
-                                                <div key={i} className="flex gap-3 p-3 rounded-xl bg-green-50 text-green-700 text-sm border border-green-100">
-                                                    <CheckCircle size={18} className="shrink-0" />
-                                                    {h}
-                                                </div>
-                                            ))}
+                                                <span className="mt-4 text-[14px] font-black uppercase tracking-[0.5em] text-[hsl(var(--primary))]">Overall Match</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Ingredient Breakdown Visualizer */}
-                                <div className="mt-8 pt-8 border-t border-[hsl(var(--border))]">
-                                    <h4 className="text-sm font-bold uppercase tracking-widest opacity-60 mb-4">Ingredient Breakdown</h4>
-                                    <div className="flex flex-wrap gap-4">
-                                        {result.categories.map((cat, i) => (
-                                            <div key={i} className={`p-4 rounded-2xl border ${cat.color} flex flex-col gap-2 min-w-[150px]`}>
-                                                <span className="text-xs font-bold uppercase tracking-wider opacity-70">{cat.name}</span>
-                                                <div className="flex flex-wrap gap-1">
-                                                    {cat.ingredients.map((ing, j) => (
-                                                        <span key={j} className="text-[10px] bg-white/50 px-1.5 py-0.5 rounded uppercase font-bold">{ing}</span>
-                                                    ))}
-                                                </div>
+                                    {/* Bottom Section: Holistic Verdict & Recommendations */}
+                                    <div className="pt-12 border-t-4 border-double border-teal-100/50">
+                                        <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden group">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                                                <Sparkles size={120} />
                                             </div>
-                                        ))}
+                                            <h3 className="text-2xl font-black mb-4 relative z-10 text-cyan-400">Holistic Verdict</h3>
+                                            <p className="text-xl leading-relaxed font-medium relative z-10 text-slate-100">
+                                                {result.explanation}
+                                            </p>
+                                        </div>
+
+                                        <div className="mt-8 grid gap-4">
+                                            {result.recommendations && result.recommendations.length > 0 && (
+                                                <ProductRecommendations recommendations={result.recommendations} />
+                                            )}
+                                            {/* Warnings & Highlights */}
+                                            <div className="flex flex-wrap gap-2">
+                                                {result.warnings.map((w, i) => (
+                                                    <div key={i} className="flex-1 min-w-[280px] flex gap-3 p-4 rounded-2xl bg-red-50 text-red-700 text-sm border border-red-100 font-medium">
+                                                        <AlertCircle size={20} className="shrink-0" />
+                                                        {w}
+                                                    </div>
+                                                ))}
+                                                {result.highlights.map((h, i) => (
+                                                    <div key={i} className="flex-1 min-w-[280px] flex gap-3 p-4 rounded-2xl bg-green-50 text-green-700 text-sm border border-green-100 font-medium">
+                                                        <CheckCircle size={20} className="shrink-0" />
+                                                        {h}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Ingredient Breakdown Visualizer */}
+                                        <div className="mt-8 pt-8 border-t border-[hsl(var(--border))]">
+                                            <h4 className="text-sm font-bold uppercase tracking-widest opacity-60 mb-4">Ingredient Breakdown</h4>
+                                            <div className="flex flex-wrap gap-4">
+                                                {result.categories.map((cat, i) => (
+                                                    <div key={i} className={`p-4 rounded-2xl border ${cat.color} flex flex-col gap-2 min-w-[150px]`}>
+                                                        <span className="text-xs font-bold uppercase tracking-wider opacity-70">{cat.name}</span>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {cat.ingredients.map((ing, j) => (
+                                                                <span key={j} className="text-[10px] bg-white/50 px-1.5 py-0.5 rounded uppercase font-bold">{ing}</span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </motion.div>
@@ -405,15 +457,20 @@ export default function Dashboard() {
                                                 </div>
 
                                                 {/* Overall Score Badge */}
-                                                <div className="flex items-center gap-2 pt-2">
-                                                    <div className={`px-4 py-2 rounded-xl font-bold ${item.suitability_score >= 80
+                                                <div className="flex flex-wrap items-center gap-3 pt-2">
+                                                    <div className={`px-4 py-2 rounded-xl font-bold text-xs ${item.suitability_score >= 80
                                                         ? 'bg-green-100 text-green-700'
                                                         : item.suitability_score >= 50
                                                             ? 'bg-amber-100 text-amber-700'
                                                             : 'bg-red-100 text-red-700'
                                                         }`}>
-                                                        Overall Score: {item.suitability_score}/100
+                                                        Suitability: {item.suitability_score}/100
                                                     </div>
+                                                    {item.goal_score !== undefined && (
+                                                        <div className={`px-4 py-2 rounded-xl font-bold text-xs bg-pink-100 text-pink-700`}>
+                                                            Goal Match: {item.goal_score}/100
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </motion.div>
                                         )}

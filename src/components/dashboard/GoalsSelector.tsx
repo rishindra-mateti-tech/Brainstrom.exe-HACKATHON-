@@ -110,13 +110,21 @@ export function GoalsSelector({ profileId, onGoalsChange }: GoalsSelectorProps) 
 
     const handlePriority1Change = async (value: string) => {
         setPriority1Goal(value);
-        const goals = priorityMode ? buildPriorityGoals() : [{ goal_name: value, priority: 1 }];
-        await saveGoals([...goals.filter(g => g.priority !== 1), { goal_name: value, priority: 1 }], priorityMode);
+        const goals: Goal[] = [];
+        if (value) goals.push({ goal_name: value, priority: 1 });
+        if (priority2Goal) goals.push({ goal_name: priority2Goal, priority: 2 });
+        priority3Goals.forEach(g => goals.push({ goal_name: g, priority: 3 }));
+
+        await saveGoals(goals, priorityMode);
     };
 
     const handlePriority2Change = async (value: string) => {
         setPriority2Goal(value);
-        const goals = buildPriorityGoals();
+        const goals: Goal[] = [];
+        if (priority1Goal) goals.push({ goal_name: priority1Goal, priority: 1 });
+        if (value) goals.push({ goal_name: value, priority: 2 });
+        priority3Goals.forEach(g => goals.push({ goal_name: g, priority: 3 }));
+
         await saveGoals(goals, priorityMode);
     };
 
@@ -126,8 +134,12 @@ export function GoalsSelector({ profileId, onGoalsChange }: GoalsSelectorProps) 
         setPriority3Goals(newGoals);
         setCustomGoal('');
 
-        const goals = buildPriorityGoals();
-        await saveGoals([...goals, { goal_name: goal, priority: 3 }], priorityMode);
+        const goals: Goal[] = [];
+        if (priority1Goal) goals.push({ goal_name: priority1Goal, priority: 1 });
+        if (priority2Goal) goals.push({ goal_name: priority2Goal, priority: 2 });
+        newGoals.forEach(g => goals.push({ goal_name: g, priority: 3 }));
+
+        await saveGoals(goals, priorityMode);
     };
 
     const removePriority3Goal = async (goal: string) => {
@@ -169,66 +181,123 @@ export function GoalsSelector({ profileId, onGoalsChange }: GoalsSelectorProps) 
                 <div className="space-y-4">
                     {/* Priority 1 */}
                     <div className="p-5 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 border border-gray-200 dark:border-cyan-900 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 dark:from-cyan-500 dark:to-blue-600 text-white text-xs font-bold flex items-center justify-center shadow-md">1</span>
-                            <h4 className="font-semibold text-slate-900 dark:text-cyan-200">Primary Goal</h4>
-                            <span className="text-xs text-gray-600 dark:text-cyan-400">(Most Important)</span>
-                        </div>
-                        <div className="space-y-2">
-                            <select
-                                value={priority1Goal}
-                                onChange={(e) => handlePriority1Change(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-cyan-800 bg-white dark:bg-cyan-950/50 text-slate-900 dark:text-cyan-100 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-100 dark:focus:ring-cyan-900 transition-all shadow-sm"
-                            >
-                                <option value="">Select your primary goal...</option>
-                                {PREDEFINED_GOALS.map(goal => (
-                                    <option key={goal} value={goal}>{goal}</option>
-                                ))}
-                            </select>
+                        <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
-                                <span className="text-xs text-slate-400 dark:text-cyan-500">or</span>
-                                <input
-                                    type="text"
-                                    placeholder="Type a custom goal..."
-                                    value={priority1Goal && !PREDEFINED_GOALS.includes(priority1Goal) ? priority1Goal : ''}
-                                    onChange={(e) => handlePriority1Change(e.target.value)}
-                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-cyan-800 bg-white dark:bg-cyan-950/50 text-slate-900 dark:text-cyan-100 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-100 dark:focus:ring-cyan-900 transition-all text-sm placeholder-slate-400 dark:placeholder-cyan-600"
-                                />
+                                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 dark:from-cyan-500 dark:to-blue-600 text-white text-xs font-bold flex items-center justify-center shadow-md">1</span>
+                                <h4 className="font-semibold text-slate-900 dark:text-cyan-200">Primary Goal</h4>
                             </div>
+                            <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-cyan-700">Limit: 1 Goal</span>
                         </div>
+
+                        {priority1Goal ? (
+                            <div className="flex items-center justify-between p-3 bg-pink-50 dark:bg-cyan-900/30 border border-pink-100 dark:border-cyan-800 rounded-xl">
+                                <span className="font-bold text-pink-700 dark:text-cyan-200">{priority1Goal}</span>
+                                <button
+                                    onClick={() => handlePriority1Change('')}
+                                    className="p-1.5 hover:bg-pink-200 dark:hover:bg-cyan-800 rounded-lg transition-colors text-pink-600 dark:text-cyan-400"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                                <select
+                                    value=""
+                                    onChange={(e) => handlePriority1Change(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-cyan-800 bg-white dark:bg-cyan-950/50 text-slate-900 dark:text-cyan-100 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-100 dark:focus:ring-cyan-900 transition-all shadow-sm"
+                                >
+                                    <option value="">Select your primary goal...</option>
+                                    {PREDEFINED_GOALS.map(goal => (
+                                        <option key={goal} value={goal}>{goal}</option>
+                                    ))}
+                                </select>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Type custom goal..."
+                                        id="custom-p1"
+                                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-cyan-800 bg-white dark:bg-cyan-950/50 text-slate-900 dark:text-cyan-100 rounded-xl focus:border-pink-500 text-sm"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                const val = (e.target as HTMLInputElement).value;
+                                                if (val) handlePriority1Change(val);
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            const el = document.getElementById('custom-p1') as HTMLInputElement;
+                                            if (el.value) handlePriority1Change(el.value);
+                                        }}
+                                        className="px-4 py-2 bg-pink-500 text-white rounded-xl hover:bg-pink-600 font-bold text-sm shadow-sm transition-all active:scale-95"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Priority 2 */}
                     <div className="p-5 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 border border-gray-200 dark:border-cyan-900 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 dark:from-cyan-500 dark:to-blue-600 text-white text-xs font-bold flex items-center justify-center shadow-md">2</span>
-                            <h4 className="font-semibold text-slate-900 dark:text-cyan-200">Secondary Goal</h4>
-                            <span className="text-xs text-gray-600 dark:text-cyan-400">(Secondary)</span>
-                        </div>
-                        <div className="space-y-2">
-                            <select
-                                value={priority2Goal}
-                                onChange={(e) => handlePriority2Change(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-cyan-800 bg-white dark:bg-cyan-950/50 text-slate-900 dark:text-cyan-100 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-100 dark:focus:ring-cyan-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={!priority1Goal}
-                            >
-                                <option value="">Select your secondary goal...</option>
-                                {PREDEFINED_GOALS.filter(g => g !== priority1Goal).map(goal => (
-                                    <option key={goal} value={goal}>{goal}</option>
-                                ))}
-                            </select>
+                        <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
-                                <span className="text-xs text-slate-400 dark:text-cyan-500">or</span>
-                                <input
-                                    type="text"
-                                    placeholder="Type a custom goal..."
-                                    value={priority2Goal && !PREDEFINED_GOALS.includes(priority2Goal) ? priority2Goal : ''}
+                                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 dark:from-cyan-500 dark:to-blue-600 text-white text-xs font-bold flex items-center justify-center shadow-md">2</span>
+                                <h4 className="font-semibold text-slate-900 dark:text-cyan-200">Secondary Goal</h4>
+                            </div>
+                            <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-cyan-700">Limit: 1 Goal</span>
+                        </div>
+
+                        {priority2Goal ? (
+                            <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-cyan-900/30 border border-orange-100 dark:border-cyan-800 rounded-xl">
+                                <span className="font-bold text-orange-700 dark:text-cyan-200">{priority2Goal}</span>
+                                <button
+                                    onClick={() => handlePriority2Change('')}
+                                    className="p-1.5 hover:bg-orange-200 dark:hover:bg-cyan-800 rounded-lg transition-colors text-orange-600 dark:text-cyan-400"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                                <select
+                                    value=""
                                     onChange={(e) => handlePriority2Change(e.target.value)}
                                     disabled={!priority1Goal}
-                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-cyan-800 bg-white dark:bg-cyan-950/50 text-slate-900 dark:text-cyan-100 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-100 dark:focus:ring-cyan-900 transition-all text-sm disabled:bg-slate-50 dark:disabled:bg-slate-900 disabled:opacity-50 placeholder-slate-400 dark:placeholder-cyan-600"
-                                />
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-cyan-800 bg-white dark:bg-cyan-950/50 text-slate-900 dark:text-cyan-100 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-100 dark:focus:ring-cyan-900 transition-all shadow-sm disabled:opacity-50"
+                                >
+                                    <option value="">Select your secondary goal...</option>
+                                    {PREDEFINED_GOALS.filter(g => g !== priority1Goal).map(goal => (
+                                        <option key={goal} value={goal}>{goal}</option>
+                                    ))}
+                                </select>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Type custom goal..."
+                                        id="custom-p2"
+                                        disabled={!priority1Goal}
+                                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-cyan-800 bg-white dark:bg-cyan-950/50 text-slate-900 dark:text-cyan-100 rounded-xl focus:border-pink-500 text-sm disabled:opacity-50"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                const val = (e.target as HTMLInputElement).value;
+                                                if (val) handlePriority2Change(val);
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        disabled={!priority1Goal}
+                                        onClick={() => {
+                                            const el = document.getElementById('custom-p2') as HTMLInputElement;
+                                            if (el.value) handlePriority2Change(el.value);
+                                        }}
+                                        className="px-4 py-2 bg-pink-500 text-white rounded-xl hover:bg-pink-600 font-bold text-sm shadow-sm transition-all active:scale-95 disabled:opacity-50"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
                     {/* Priority 3 */}
@@ -291,6 +360,13 @@ export function GoalsSelector({ profileId, onGoalsChange }: GoalsSelectorProps) 
                             </div>
                         )}
                     </div>
+
+                    {/* Feedback Message */}
+                    {priorityMode && [priority1Goal, priority2Goal, priority3Goals.length > 0].filter(Boolean).length === 1 && (
+                        <p className="text-center text-xs font-bold text-pink-500 dark:text-cyan-400 animate-pulse mt-4">
+                            ✨ You selected only 1 priority. Weight: 100%
+                        </p>
+                    )}
                 </div>
             ) : (
                 /* Simple Mode - Single Goal with custom input */

@@ -60,16 +60,17 @@ export function PriorityBreakdown({ goalEffectiveness, priorityMode }: PriorityB
                                     {priorityMode && (
                                         <p className="text-xs text-gray-600">
                                             {(() => {
-                                                const uniquePriorities = [...new Set(goalEffectiveness.map(g => g.priority))];
-                                                const count = uniquePriorities.length;
+                                                const prioritiesPresent = [...new Set(goalEffectiveness.map(g => g.priority))].sort();
+                                                const count = prioritiesPresent.length;
+                                                const currentPIndex = prioritiesPresent.indexOf(ge.priority);
 
                                                 if (count === 3) {
-                                                    return ge.priority === 1 ? 'Weight: 50% (Most Important)' :
+                                                    return ge.priority === 1 ? 'Weight: 50% (Primary)' :
                                                         ge.priority === 2 ? 'Weight: 37% (Secondary)' :
-                                                            'Weight: 13% (Nice-to-have)';
+                                                            'Weight: 13% (Additional)';
                                                 } else if (count === 2) {
-                                                    return ge.priority === 1 ? 'Weight: 60% (Most Important)' :
-                                                        ge.priority === 2 ? 'Weight: 40% (Secondary)' : '';
+                                                    // Top priority present gets 60%, bottom gets 40%
+                                                    return currentPIndex === 0 ? 'Weight: 60% (Main Focus)' : 'Weight: 40% (Secondary Focus)';
                                                 } else {
                                                     return 'Weight: 100% (Single Focus)';
                                                 }
