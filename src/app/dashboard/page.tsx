@@ -343,7 +343,7 @@ export default function Dashboard() {
                                             </div>
 
                                             {/* Overall Goal Gauge */}
-                                            <div className="flex flex-col items-center justify-center p-6 bg-[hsl(var(--primary)/0.03)] border border-[hsl(var(--primary)/0.2)] rounded-2xl min-w-[200px] shadow-lg">
+                                            <div className="flex flex-col items-center justify-center p-6 bg-[hsl(var(--primary)/0.03)] border border-[hsl(var(--primary)/0.2)] rounded-2xl min-w-[200px] shadow-lg lg:mt-24">
                                                 <div className={`w-36 h-36 rounded-full border-[12px] flex flex-col items-center justify-center font-black ${result.goalScore >= 80 ? 'border-[hsl(var(--primary))] text-[hsl(var(--primary))]' :
                                                     result.goalScore >= 50 ? 'border-amber-500 text-amber-600' : 'border-red-500 text-red-600'
                                                     }`}>
