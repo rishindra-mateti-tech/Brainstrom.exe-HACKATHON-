@@ -81,9 +81,10 @@ export const analyzeIngredientsWithGoals = (
                 goalEffectiveness,
                 baseAnalysis.score
             );
-        } else {
-            // Simple mode: just use the first goal's effectiveness
-            finalScore = goalEffectiveness[0]?.score || baseAnalysis.score;
+        } else if (goalEffectiveness.length > 0) {
+            // Simple mode: average all goals equally
+            const avgGoalScore = goalEffectiveness.reduce((sum, g) => sum + g.score, 0) / goalEffectiveness.length;
+            finalScore = Math.round((avgGoalScore * 0.8) + (baseAnalysis.score * 0.2));
         }
     }
 
@@ -94,9 +95,24 @@ export const analyzeIngredientsWithGoals = (
         goalEffectiveness
     );
 
+    // Update explanation based on FINAL score (crucial fix)
+    let explanation = "";
+    if (finalScore >= 80) {
+        explanation = "Excellent match! This product aligns very well with your skin profile.";
+    } else if (finalScore >= 60) {
+        explanation = "Good choice. This product should work well for you with minor considerations.";
+    } else if (finalScore >= 40) {
+        explanation = "Acceptable. This product has some ingredients you might want to monitor.";
+    } else if (finalScore >= 20) {
+        explanation = "⚠️ Caution: This product has several conflicts with your skin profile or history.";
+    } else {
+        explanation = "❌ Not recommended. This product contains multiple problematic ingredients for your skin.";
+    }
+
     return {
         ...baseAnalysis,
         score: finalScore,
+        explanation: explanation, // Override base explanation with new score-based one
         extractedIngredients,
         personalizedInsights,
         goalEffectiveness,
@@ -191,24 +207,38 @@ function calculateGoalEffectiveness(
     };
 }
 
+
 function calculatePriorityWeightedScore(
     goalEffectiveness: GoalEffectiveness[],
     baseScore: number
 ): number {
-    // Priority weights based on user specifications
-    // P1 = 50%, P2 = 37%, P3 = 13%
-    const weights = { 1: 0.50, 2: 0.37, 3: 0.13 };
+    // Dynamic priority weights based on how many priorities are set
+    // 3 priorities: P1=50%, P2=37%, P3=13%
+    // 2 priorities: P1=60%, P2=40%
+    // 1 priority: P1=100%
+
+    const uniquePriorities = [...new Set(goalEffectiveness.map(g => g.priority))].sort();
+    const numPriorities = uniquePriorities.length;
+
+    let weights: { [key: number]: number } = {};
+
+    if (numPriorities === 3) {
+        weights = { 1: 0.50, 2: 0.37, 3: 0.13 };
+    } else if (numPriorities === 2) {
+        weights = { 1: 0.60, 2: 0.40 };
+    } else {
+        weights = { 1: 1.0 };
+    }
 
     let weightedSum = 0;
 
     // Calculate weighted sum: sum(score × weight) for each priority
     goalEffectiveness.forEach(ge => {
-        const weight = weights[ge.priority as keyof typeof weights] || 0;
+        const weight = weights[ge.priority] || 0;
         weightedSum += ge.score * weight;
     });
 
     // The weighted sum IS the final score (no division needed in weighted average)
-    // Example: P1=100 (×0.50) + P2=20 (×0.37) + P3=19 (×0.13) = 50 + 7.4 + 2.47 = 59.87
     const goalScore = Math.round(weightedSum);
 
     // Blend goal score (80%) with base compatibility score (20%) for safety checks

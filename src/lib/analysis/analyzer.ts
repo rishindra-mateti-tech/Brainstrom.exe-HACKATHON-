@@ -63,23 +63,6 @@ export const analyzeIngredients = (
         }
     }
 
-    // Final score clamping
-    score = Math.max(0, Math.min(100, score));
-
-    // Generate explanation based on final score
-    let explanation = "";
-    if (score >= 80) {
-        explanation = "Excellent match! This product aligns very well with your skin profile.";
-    } else if (score >= 65) {
-        explanation = "Good choice. This product should work well for you with minor considerations.";
-    } else if (score >= 50) {
-        explanation = "Acceptable. This product has some ingredients you might want to monitor.";
-    } else if (score >= 30) {
-        explanation = "⚠️ Caution: This product has several conflicts with your skin profile or history.";
-    } else {
-        explanation = "❌ Not recommended. This product contains multiple problematic ingredients for your skin.";
-    }
-
     const categories = [
         { name: 'Humectants', keywords: ['glycerin', 'hyaluronic', 'propanediol', 'panthenol'], color: 'bg-cyan-100 text-cyan-700' },
         { name: 'Soothing', keywords: ['centella', 'aloe', 'allantoin', 'bisabolol'], color: 'bg-green-100 text-green-700' },
@@ -91,6 +74,29 @@ export const analyzeIngredients = (
         ...cat,
         ingredients: ingredientList.filter(i => cat.keywords.some(k => i.includes(k)))
     })).filter(c => c.ingredients.length > 0);
+
+    // Significance Penalty: If no known functional categories are found, it's likely not a good skincare match
+    if (detectedCategories.length === 0) {
+        score -= 60;
+        warnings.push("No key functional skincare ingredients identified.");
+    }
+
+    // Final score clamping
+    score = Math.max(0, Math.min(100, score));
+
+    // Generate explanation based on final score
+    let explanation = "";
+    if (score >= 80) {
+        explanation = "Excellent match! This product aligns very well with your skin profile.";
+    } else if (score >= 60) {
+        explanation = "Good choice. This product should work well for you with minor considerations.";
+    } else if (score >= 40) {
+        explanation = "Acceptable. This product has some ingredients you might want to monitor.";
+    } else if (score >= 20) {
+        explanation = "⚠️ Caution: This product has several conflicts with your skin profile or history.";
+    } else {
+        explanation = "❌ Not recommended. This product contains multiple problematic ingredients for your skin.";
+    }
 
     return {
         score,

@@ -59,9 +59,21 @@ export function PriorityBreakdown({ goalEffectiveness, priorityMode }: PriorityB
                                     <h4 className="font-semibold text-gray-900">{ge.goal}</h4>
                                     {priorityMode && (
                                         <p className="text-xs text-gray-600">
-                                            {ge.priority === 1 ? 'Weight: 50% (Most Important)' :
-                                                ge.priority === 2 ? 'Weight: 37% (Secondary)' :
-                                                    'Weight: 13% (Nice-to-have)'}
+                                            {(() => {
+                                                const uniquePriorities = [...new Set(goalEffectiveness.map(g => g.priority))];
+                                                const count = uniquePriorities.length;
+
+                                                if (count === 3) {
+                                                    return ge.priority === 1 ? 'Weight: 50% (Most Important)' :
+                                                        ge.priority === 2 ? 'Weight: 37% (Secondary)' :
+                                                            'Weight: 13% (Nice-to-have)';
+                                                } else if (count === 2) {
+                                                    return ge.priority === 1 ? 'Weight: 60% (Most Important)' :
+                                                        ge.priority === 2 ? 'Weight: 40% (Secondary)' : '';
+                                                } else {
+                                                    return 'Weight: 100% (Single Focus)';
+                                                }
+                                            })()}
                                         </p>
                                     )}
                                 </div>

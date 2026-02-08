@@ -368,16 +368,17 @@ export default function Dashboard() {
                             {history.map((item) => {
                                 const isExpanded = expandedHistoryId === item.id;
                                 return (
-                                    <Card key={item.id} className="bg-white dark:bg-gradient-to-br dark:from-slate-800/40 dark:to-blue-900/40 hover:shadow-md dark:hover:border-cyan-700 transition-all duration-300 group border border-gray-200 dark:border-cyan-900/50 shadow-sm">
+                                    <Card key={item.id} className="bg-white dark:bg-slate-900/40 dark:backdrop-blur-sm hover:shadow-md dark:hover:shadow-cyan-500/20 dark:hover:border-cyan-500/60 transition-all duration-300 group border border-gray-200 dark:border-cyan-700/40 shadow-sm dark:shadow-cyan-500/10">
                                         {/* Header - Always Visible */}
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <p className="font-bold text-gray-900 dark:text-cyan-100">{item.product_name}</p>
                                                 <p className="text-xs text-gray-600 dark:text-cyan-400">{new Date(item.analysis_date).toLocaleDateString()}</p>
                                             </div>
-                                            <div className={`px-2 py-1 rounded text-xs font-bold ${item.suitability_score >= 80
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300'
+                                            <div className={`px-2 py-1 rounded text-xs font-bold ${item.suitability_score >= 80 ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' :
+                                                item.suitability_score >= 60 ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300' :
+                                                    item.suitability_score >= 40 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' :
+                                                        'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
                                                 }`}>
                                                 {item.suitability_score}
                                             </div>
