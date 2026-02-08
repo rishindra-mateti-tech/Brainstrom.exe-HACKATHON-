@@ -329,7 +329,7 @@ export default function Dashboard() {
                                     </div>
 
                                     {/* Mid Section: Priority Breakdown & Goal Score */}
-                                    <div className="pt-12 border-t border-teal-100/30">
+                                    <div className="pt-20 border-t border-teal-100/30">
                                         <div className="flex flex-col lg:flex-row gap-8 items-start">
                                             <div className="flex-1 w-full">
                                                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[hsl(var(--primary))] uppercase tracking-tighter">
@@ -343,11 +343,11 @@ export default function Dashboard() {
                                             </div>
 
                                             {/* Overall Goal Gauge */}
-                                            <div className="flex flex-col items-center justify-center p-8 bg-[hsl(var(--primary)/0.03)] border-4 border-[hsl(var(--primary)/0.2)] rounded-3xl min-w-[240px] shadow-lg">
-                                                <div className={`w-40 h-40 rounded-full border-[14px] flex flex-col items-center justify-center font-black ${result.goalScore >= 80 ? 'border-[hsl(var(--primary))] text-[hsl(var(--primary))]' :
+                                            <div className="flex flex-col items-center justify-center p-6 bg-[hsl(var(--primary)/0.03)] border border-[hsl(var(--primary)/0.2)] rounded-2xl min-w-[200px] shadow-lg">
+                                                <div className={`w-36 h-36 rounded-full border-[12px] flex flex-col items-center justify-center font-black ${result.goalScore >= 80 ? 'border-[hsl(var(--primary))] text-[hsl(var(--primary))]' :
                                                     result.goalScore >= 50 ? 'border-amber-500 text-amber-600' : 'border-red-500 text-red-600'
                                                     }`}>
-                                                    <span className="text-6xl">{result.goalScore}</span>
+                                                    <span className="text-5xl">{result.goalScore}</span>
                                                     <span className="text-xs uppercase tracking-widest mt-1 opacity-60">Result</span>
                                                 </div>
                                                 <span className="mt-4 text-[14px] font-black uppercase tracking-[0.5em] text-[hsl(var(--primary))]">Overall Match</span>
@@ -356,7 +356,7 @@ export default function Dashboard() {
                                     </div>
 
                                     {/* Bottom Section: Holistic Verdict & Recommendations */}
-                                    <div className="pt-12 border-t-4 border-double border-teal-100/50">
+                                    <div className="pt-16 border-t-4 border-double border-teal-100/50">
                                         <div className="bg-white dark:bg-slate-900 border-2 border-[hsl(var(--primary)/0.2)] dark:border-cyan-900/50 p-8 rounded-3xl shadow-xl relative overflow-hidden group">
                                             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
                                                 <Sparkles size={120} className="text-[hsl(var(--primary))]" />
