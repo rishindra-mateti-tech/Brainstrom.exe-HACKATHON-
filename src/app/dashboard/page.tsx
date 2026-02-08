@@ -363,12 +363,28 @@ export default function Dashboard() {
                                             </div>
                                             <h3 className="text-2xl font-black mb-4 relative z-10 text-[hsl(var(--primary))] dark:text-cyan-400">Holistic Verdict</h3>
                                             <div className="text-lg leading-relaxed font-medium relative z-10 text-slate-900 dark:text-slate-100 space-y-4">
-                                                <p>
-                                                    Your product suitability score is <span className="text-orange-600 dark:text-orange-400 font-bold">{result.suitabilityScore}</span> ({result.suitabilityScore >= 80 ? 'safe for your skin' : result.suitabilityScore >= 50 ? 'caution advised' : 'not recommended'}) and your overall goal-based score is <span className="text-pink-600 dark:text-cyan-400 font-bold">{result.goalScore}</span> ({result.goalScore >= 80 ? 'highly effective' : result.goalScore >= 50 ? 'moderately effective' : 'not very effective'}) for your goals.
-                                                </p>
-                                                <p className="text-slate-600 dark:text-slate-400 text-base font-normal">
+                                                <p className="font-bold underline decoration-[hsl(var(--primary)/0.3)]">
                                                     {result.explanation}
                                                 </p>
+                                                <p className="text-slate-600 dark:text-slate-400 text-base font-normal">
+                                                    {result.suitabilityExplanation}
+                                                </p>
+
+                                                {/* Immediate Explanation (Warnings & Highlights) */}
+                                                <div className="flex flex-wrap gap-2 pt-2">
+                                                    {result.warnings.map((w, i) => (
+                                                        <div key={i} className="flex-1 min-w-[240px] flex gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-100 font-medium">
+                                                            <AlertCircle size={14} className="shrink-0" />
+                                                            {w}
+                                                        </div>
+                                                    ))}
+                                                    {result.highlights.map((h, i) => (
+                                                        <div key={i} className="flex-1 min-w-[240px] flex gap-2 p-3 rounded-xl bg-green-50 text-green-700 text-xs border border-green-100 font-medium">
+                                                            <CheckCircle size={14} className="shrink-0" />
+                                                            {h}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
 
@@ -376,21 +392,6 @@ export default function Dashboard() {
                                             {result.recommendations && result.recommendations.length > 0 && (
                                                 <ProductRecommendations recommendations={result.recommendations} />
                                             )}
-                                            {/* Warnings & Highlights */}
-                                            <div className="flex flex-wrap gap-2">
-                                                {result.warnings.map((w, i) => (
-                                                    <div key={i} className="flex-1 min-w-[280px] flex gap-3 p-4 rounded-2xl bg-red-50 text-red-700 text-sm border border-red-100 font-medium">
-                                                        <AlertCircle size={20} className="shrink-0" />
-                                                        {w}
-                                                    </div>
-                                                ))}
-                                                {result.highlights.map((h, i) => (
-                                                    <div key={i} className="flex-1 min-w-[280px] flex gap-3 p-4 rounded-2xl bg-green-50 text-green-700 text-sm border border-green-100 font-medium">
-                                                        <CheckCircle size={20} className="shrink-0" />
-                                                        {h}
-                                                    </div>
-                                                ))}
-                                            </div>
                                         </div>
 
                                         {/* Ingredient Breakdown Visualizer */}
