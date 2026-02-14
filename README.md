@@ -2,7 +2,7 @@
 
 **AI-Powered Skincare Intelligence Platform**
 
-CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product ingredients based on your unique skin profile, climate, and personal skincare goals. Built for the Brainstrom.exe Hackathon.
+CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product ingredients based on your unique skin profile, climate, and personal skincare goals. Built for the Make-it-Wright Hackathon.
 
 ## 🌟 Features
 
@@ -29,6 +29,7 @@ CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product in
 - **Authentication**: Supabase Auth
 - **OCR**: Tesseract.js
 - **UI Components**: shadcn/ui
+-  **APIs**: Open-Meteo, IPAPI
 - **Animations**: Framer Motion
 
 ## 🚀 Quick Start
