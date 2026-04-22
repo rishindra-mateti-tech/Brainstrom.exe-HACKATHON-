@@ -1,0 +1,11 @@
+import pandas as pd
+df = pd.read_csv('dataset_for_v2/COSING_Ingredients-Fragrance Inventory_v2.csv')
+df['Function'] = df['Function'].fillna('UNKNOWN')
+df['PF'] = df['Function'].apply(lambda x: x.split(',')[0].strip().upper())
+df['PF'] = df['PF'].apply(lambda x: 'SKIN CONDITIONING' if x.startswith('SKIN CONDITIONING') else x)
+print(f"Total classes (no filter): {df['PF'].nunique()}")
+counts = df['PF'].value_counts()
+print(f"Classes with >= 20 samples: {len(counts[counts >= 20])}")
+print(f"Classes with >= 10 samples: {len(counts[counts >= 10])}")
+print(f"\nClasses with < 20 samples:")
+print(counts[counts < 20])

@@ -1,0 +1,9 @@
+pandas
+scikit-learn
+fastapi
+uvicorn
+nltk
+joblib
+xlrd
+openpyxl
+requests

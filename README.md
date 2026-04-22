@@ -1,10 +1,55 @@
 # CUTIeS-IQ 🧴✨
 
-**AI-Powered Skincare Intelligence Platform**
+**Academic Project Overview & Hackathon History**
 
-CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product ingredients based on your unique skin profile, climate, and personal skincare goals. Built for the Make-it-Wright Hackathon.
+Welcome to the CUTIeS-IQ repository! This codebase serves a dual purpose: it originated as a winning submission for the Brainstrom.exe Hackathon 2026, and has since been significantly expanded for an academic Machine Learning Final Project.
 
-## 🌟 Features
+To ensure clear academic grading and review, the repository has been split into two distinct versions:
+
+---
+
+## 📁 Repository Structure
+
+### [Version 1: The Hackathon Baseline]
+Located in `/version 1/`.
+This folder contains the **exact, unmodified** Next.js codebase that won the hackathon. It utilizes a static logic-based algorithm for skin profile matching and computer vision (Tesseract.js). There are no machine learning capabilities inside Version 1.
+
+### [Version 2: The ML Final Project]
+Located in `/version 2/`.
+This directory represents the extension of the platform utilizing dynamic Machine Learning, and is split into two parts:
+
+#### 1. `v2_as_ML_finalproject/` **(Grading Directory)**
+**Professor / Grader:** Please navigate to this folder to review the core academic submission.
+*   **Dataset:** Contains `dataset_for_v2`, a cleaned version of the CosIng dataset.
+*   **Model Training & Evaluation:** Open `model_training.ipynb` (Jupyter Notebook). This notebook handles data preprocessing natively and runs a comparative evaluation between **Logistic Regression**, **Decision Trees**, and **Random Forest** algorithms to predict complex cosmetic ingredient functions and safety flags.
+*   **Metrics:** The notebook automatically executes and clearly outputs **Accuracy, Precision, Recall, and F1 Scores** for all models, justifying the selection of Random Forest for the final platform.
+*   **Environment:** A clear `requirements.txt` is provided for immediate compilation stability.
+
+#### 2. `integration/`
+This folder demonstrates how the chosen Random Forest ML model from the assignment was seamlessly hooked into the actual Next.js application! It hosts a FastAPI microservice backend and a unified frontend where users can actively toggle between the V1 heuristic scanner and the new V2 ML engine.
+
+---
+
+## 🚀 Getting Started for Grading
+
+To review the Machine Learning implementation:
+1. Navigate into the grading directory:
+```bash
+cd "version 2/v2_as_ML_finalproject"
+```
+2. Install the required data science packages:
+```bash
+pip install -r requirements.txt
+```
+3. Boot up Jupyter Notebook (using the python module explicitly to avoid Windows PATH errors) or use your IDE's native notebook runner:
+```bash
+python -m notebook
+```
+4. Open `model_training.ipynb` and click **"Run All"** to observe data cleaning, active model training, and the explicit final output efficiencies!
+
+---
+
+## 🌟 Hackathon Features (Version 1)
 
 ### Core Functionality
 - **🔍 OCR Ingredient Analysis** - Upload product photos and extract ingredient lists automatically
@@ -20,8 +65,7 @@ CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product in
 - **Priority Weighting** - P1 (50%), P2 (37%), P3 (13%) for precise product evaluation
 - **Dark/Light Mode** - Beautiful pink/white light theme and cyan dark theme
 
-## 🛠️ Tech Stack
-
+## 🛠️ V1 Tech Stack
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
@@ -29,59 +73,10 @@ CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product in
 - **Authentication**: Supabase Auth
 - **OCR**: Tesseract.js
 - **UI Components**: shadcn/ui
--  **APIs**: Open-Meteo, IPAPI
+- **APIs**: Open-Meteo, IPAPI
 - **Animations**: Framer Motion
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18+ and npm
-- Supabase account
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/rishindra-mateti-tech/Brainstrom.exe-HACKATHON-.git
-cd CutisIQ
-```
-
-2. **Install dependencies**
-```bash
-npm install
-```
-
-3. **Environment Setup**
-Create `.env.local` file:
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-4. **Run development server**
-```bash
-npm run dev
-```
-
-Visit `http://localhost:3000`
-
-## 📦 Database Setup
-
-The app uses Supabase with the following tables:
-- `profiles` - User skin profiles
-- `product_history` - Analysis history
-- `allergies` - User allergen tracking
-- `ingredient_feedback` - Reaction memory
-- `user_goals` - Priority-based goals
-
-## 🎨 UI Design
-
-- **Light Mode**: Clean white/gray with pink accents
-- **Dark Mode**: Slate-900 → Blue-950 gradient with cyan accents
-- **Theme**: Matches homepage branding with modern glassmorphism effects
-
 ## 🏆 Hackathon Team
-
 **Hack Squad** - Location: Russ 158
 
 1. Rishindra Mateti - [mateti.7@wright.edu](mailto:mateti.7@wright.edu)
@@ -91,9 +86,7 @@ The app uses Supabase with the following tables:
 5. Mohith Kovvuri - [kovvuri.6@wright.edu](mailto:kovvuri.6@wright.edu)
 
 ## 📄 License
-
-Built for Make - It - Wright hackathon 2026
+Built for Make-It-Wright hackathon 2026 and finalized for the Machine Learning Course term project.
 
 ## 🙏 Acknowledgments
-
-Special thanks to Wright State University and Make-It_Wright Hackathon organizers!
+Special thanks to Wright State University and Make-It-Wright Hackathon organizers!
