@@ -29,4 +29,4 @@ If you are looking for our ML course project:
 Additionally, the `version 2 / integration` folder contains an experimental setup demonstrating how these models can be deployed to a web backend.
 
 **Note on Live App Availability:**
-Because our working prototype uses a free-tier Supabase (PostgreSQL) database, the backend automatically pauses after a week of inactivity. If you try to use the live CutisIQ web app and it doesn't work, the database is likely asleep! Please feel free to contact me at **rishindra.tech@gmail.com** and I will gladly wake it up so you can experience it.
+Because our working prototype uses a free-tier Supabase (PostgreSQL) database, the backend automatically pauses after a week of inactivity. If you try to use the live CutisIQ web app and it doesn't work, the database is likely asleep! Please feel free to contact me at **rishindra.tech@gmail.com** and I will gladly wake it up so you can experience it...!
