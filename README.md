@@ -1,5 +1,13 @@
 # CutisIQ: Skincare Ingredient Analysis
 
+## 🎬 Demo Video
+[![CutisIQ Demo](https://img.shields.io/badge/YouTube-Watch%20Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/WDVm2PUrfvA)
+
+> Watch our full project walkthrough and demo on YouTube: https://youtu.be/WDVm2PUrfvA
+
+## 📄 Research Paper
+[![Research Paper](https://img.shields.io/badge/PDF-Research%20Paper-blue?style=for-the-badge&logo=adobeacrobatreader)](./rishindra_csr.pdf)
+
 Welcome to the CutisIQ repository. This project is divided into two main parts: our initial hackathon project (Version 1) and our Machine Learning final project (Version 2).
 
 ### Version 1: The Hackathon Winner

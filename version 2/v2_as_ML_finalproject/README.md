@@ -1,5 +1,13 @@
 # A Comprehensive Evaluation of Machine Learning Models for Skincare Ingredient Classification with Class Sparsity Reduction
 
+## 🎬 Demo Video
+[![CutisIQ Demo](https://img.shields.io/badge/YouTube-Watch%20Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/WDVm2PUrfvA)
+
+> Watch our full project walkthrough and demo on YouTube: https://youtu.be/WDVm2PUrfvA
+
+## 📄 Research Paper
+[![Research Paper](https://img.shields.io/badge/PDF-Research%20Paper-blue?style=for-the-badge&logo=adobeacrobatreader)](./rishindra_csr.pdf)
+
 **Me and My Team:**
 *   Rishindra Mateti - U01122471
 *   Surya Thota - U01153942
