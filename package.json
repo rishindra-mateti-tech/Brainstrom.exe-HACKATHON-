@@ -1,0 +1,10 @@
+{
+  "name": "cutisiq-root",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --prefix \"version 1\"",
+    "dev": "npm run dev --prefix \"version 1\"",
+    "start": "npm start --prefix \"version 1\"",
+    "lint": "npm run lint --prefix \"version 1\""
+  }
+}
