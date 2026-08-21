@@ -2,8 +2,7 @@ pandas
 scikit-learn
 fastapi
 uvicorn
-nltk
 joblib
-xlrd
-openpyxl
+python-calamine
 requests
+beautifulsoup4

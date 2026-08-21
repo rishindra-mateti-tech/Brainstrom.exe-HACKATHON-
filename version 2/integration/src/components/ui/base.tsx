@@ -63,6 +63,24 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
 );
 Input.displayName = 'Input';
 
+export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
+    ({ className, children, ...props }, ref) => {
+        return (
+            <select
+                className={cn(
+                    'flex w-full rounded-[var(--radius)] border border-[hsl(var(--border))] bg-white dark:bg-slate-900/50 px-4 py-3 text-base ring-offset-background placeholder:text-[hsl(var(--muted-foreground))] text-gray-900 dark:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:focus-visible:ring-cyan-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-standard',
+                    className
+                )}
+                ref={ref}
+                {...props}
+            >
+                {children}
+            </select>
+        );
+    }
+);
+Select.displayName = 'Select';
+
 export const Card = ({ className, children }: { className?: string; children: React.ReactNode }) => (
     <div className={cn('rounded-[var(--radius)] p-6 backdrop-blur-md bg-white dark:bg-slate-900/70 border border-gray-100 dark:border-slate-700/50 shadow-lg', className)}>
         {children}

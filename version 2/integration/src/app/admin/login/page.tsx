@@ -2,28 +2,52 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { Button, Card, Input } from '@/components/ui/base';
-import { Logo } from '@/components/ui/Logo';
 import { ShieldCheck, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function AdminLogin() {
     const router = useRouter();
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
-        if (username === 'admin' && password === 'admin123') {
-            // Secure enough for hackathon demo
-            localStorage.setItem('isAdmin', 'true');
-            document.cookie = "isAdmin=true; path=/";
+        try {
+            const { data, error: signInError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (signInError) throw signInError;
+
+            const user = data.user;
+            if (!user) throw new Error('Sign-in failed.');
+
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('is_admin')
+                .eq('id', user.id)
+                .single();
+
+            if (profileError || !profileData?.is_admin) {
+                await supabase.auth.signOut();
+                setError('Not authorized.');
+                setLoading(false);
+                return;
+            }
+
             router.push('/admin/dashboard');
-        } else {
-            setError('Invalid administration credentials');
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || 'Invalid administration credentials');
+            setLoading(false);
         }
     };
 
@@ -49,11 +73,13 @@ export default function AdminLogin() {
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Username</label>
+                            <label className="text-sm font-medium">Email</label>
                             <Input
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                placeholder="admin"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="admin@example.com"
+                                required
                             />
                         </div>
                         <div className="space-y-2">
@@ -63,6 +89,7 @@ export default function AdminLogin() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
+                                required
                             />
                         </div>
 
@@ -72,7 +99,7 @@ export default function AdminLogin() {
                             </p>
                         )}
 
-                        <Button type="submit" className="w-full">
+                        <Button type="submit" className="w-full" isLoading={loading}>
                             <Lock size={16} className="mr-2" /> Access Dashboard
                         </Button>
                     </form>

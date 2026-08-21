@@ -1,5 +1,7 @@
 // ML API Service Integration
 
+import { supabase } from './supabase';
+
 // The FastAPI service URL
 const ML_API_BASE_URL = process.env.NEXT_PUBLIC_ML_API_URL || 'http://localhost:8000';
 
@@ -12,6 +14,29 @@ export interface MLAnalysisResult {
     is_prohibited: boolean;
     prohibited_details?: string;
     safety_score: number;
+    source?: 'verified' | 'ai_estimate' | 'ml-classifier';
+}
+
+export interface UnknownIngredientUserContext {
+    skin_type: string | null;
+    goals: Array<{ goal_name: string; priority: number }>;
+    allergies: string[];
+    history: Array<{ ingredient_name: string; reaction: string }>;
+}
+
+export interface UnknownIngredientAnalysisResult {
+    inci_name: string;
+    effectiveness: number;
+    reason: string;
+    compatibility: {
+        oily: number;
+        dry: number;
+        combination: number;
+        sensitive: number;
+        normal: number;
+    } | null;
+    source: 'verified' | 'ai_estimate';
+    source_url: string | null;
 }
 
 export async function checkMLServiceHealth(): Promise<boolean> {
@@ -69,6 +94,49 @@ export async function analyzeProductML(ingredients: string[]): Promise<MLAnalysi
 
     // Filter out any failed analysis (nulls)
     return results.filter((r): r is MLAnalysisResult => r !== null);
+}
+
+// Calls our own Next.js API route (NOT the FastAPI service directly) so the
+// Gemini API key can be resolved server-side from the authenticated user's
+// session (or the project-level fallback key). The browser never sees the
+// actual key.
+export async function analyzeUnknownIngredientML(
+    inciName: string,
+    description: string,
+    userContext: UnknownIngredientUserContext
+): Promise<UnknownIngredientAnalysisResult | null> {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const accessToken = session?.access_token;
+
+        if (!accessToken) {
+            console.warn('No active session; cannot resolve API key for unknown ingredient analysis.');
+            return null;
+        }
+
+        const response = await fetch(`/api/analyze-unknown-ingredient`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+                inci_name: inciName,
+                description,
+                user_context: userContext,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Unknown ingredient analysis error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data as UnknownIngredientAnalysisResult;
+    } catch (error) {
+        console.error(`Failed to analyze unknown ingredient ${inciName}:`, error);
+        return null; // Graceful fallback
+    }
 }
 
 // Utility to suggest alternatives if an ingredient is restricted/prohibited

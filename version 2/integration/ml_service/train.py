@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 import numpy as np
 import joblib
@@ -76,7 +77,19 @@ def train_model(df, output_dir):
     
     print("Training model (this may take a few minutes)...")
     # Using RandomForest inside MultiOutputClassifier
-    base_rf = RandomForestClassifier(n_estimators=100, n_jobs=-1, random_state=42, class_weight='balanced')
+    # NOTE: MultiOutputClassifier trains one full RandomForest per label class (69 classes
+    # here), so tree size/count directly multiplies the artifact size. Unconstrained trees
+    # (no max_depth) produced a ~660MB pickle -- too large for free-tier hosting memory
+    # limits. Capping max_depth/min_samples_leaf and trimming n_estimators keeps accuracy
+    # close to the unconstrained baseline while cutting the artifact down drastically.
+    base_rf = RandomForestClassifier(
+        n_estimators=50,
+        max_depth=20,
+        min_samples_leaf=2,
+        n_jobs=-1,
+        random_state=42,
+        class_weight='balanced',
+    )
     model = MultiOutputClassifier(base_rf, n_jobs=-1)
     
     model.fit(X_train, y_train)
@@ -105,9 +118,29 @@ def train_model(df, output_dir):
 
     print("Training complete!")
 
+def _default_data_dir():
+    # ml_service/../../v2_as_ML_finalproject/dataset_for_v2 -- the CosIng dataset
+    # checked into the repo alongside this service.
+    return os.path.join(os.path.dirname(__file__), "..", "..", "v2_as_ML_finalproject", "dataset_for_v2")
+
+
+def _default_output_dir():
+    return os.path.join(os.path.dirname(__file__), "models")
+
+
 if __name__ == "__main__":
-    DATA_DIR = r"C:\Users\rishi\OneDrive\Desktop\dataset ( cuties V2)"
-    OUTPUT_DIR = r"C:\Users\rishi\OneDrive\Desktop\CutisIQ\ml_service\models"
-    
-    df = load_and_clean_data(DATA_DIR)
-    train_model(df, OUTPUT_DIR)
+    parser = argparse.ArgumentParser(description="Train the CUTIeS-IQ ingredient-function classifier.")
+    parser.add_argument(
+        "--data-dir",
+        default=_default_data_dir(),
+        help="Directory containing the CosIng CSV dataset (default: repo-relative ../../v2_as_ML_finalproject/dataset_for_v2).",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=_default_output_dir(),
+        help="Directory to write trained model artifacts to (default: ml_service/models).",
+    )
+    args = parser.parse_args()
+
+    df = load_and_clean_data(args.data_dir)
+    train_model(df, args.output_dir)

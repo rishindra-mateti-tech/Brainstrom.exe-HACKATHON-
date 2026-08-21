@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.env*.local
+.env
+!.env.example
+
+ml_service/__pycache__/
+ml_service/models/*.pkl
+!ml_service/models/mlb_functions.pkl
+!ml_service/models/tfidf_desc.pkl
+!ml_service/models/tfidf_name.pkl

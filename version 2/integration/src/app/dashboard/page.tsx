@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Button, Card, Input } from '@/components/ui/base';
 import { Logo } from '@/components/ui/Logo';
@@ -238,6 +239,13 @@ export default function Dashboard() {
                             <Cloud size={16} className="text-[hsl(var(--primary))]" />
                             <span className="text-sm font-medium">{profile?.location_city} • {profile?.current_season}</span>
                         </div>
+                        <Link
+                            href="/settings"
+                            className="p-2 rounded-full hover:bg-[hsl(var(--muted)/0.5)] transition-colors"
+                            title="Settings"
+                        >
+                            <Settings size={20} className="text-slate-500 dark:text-slate-400" />
+                        </Link>
                         <button
                             onClick={() => supabase.auth.signOut().then(() => window.location.href = '/')}
                             className="p-2 rounded-full hover:bg-red-50 text-red-500 transition-colors"

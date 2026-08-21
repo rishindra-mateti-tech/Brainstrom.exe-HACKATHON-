@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button, Card } from '@/components/ui/base';
 import { Logo } from '@/components/ui/Logo';
-import { Users, LayoutDashboard, LogOut, Activity, FlaskConical } from 'lucide-react';
+import { Users, LogOut, Activity, FlaskConical, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function AdminDashboard() {
@@ -17,15 +17,27 @@ export default function AdminDashboard() {
         ingredients: 0
     });
     const [recentScans, setRecentScans] = useState<any[]>([]);
+    const [isDemoData, setIsDemoData] = useState(false);
 
     useEffect(() => {
         const checkAuth = async () => {
-            const isAdmin = localStorage.getItem('isAdmin');
-            // Check auth (simple check for demo)
-            if (!isAdmin) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
                 router.push('/admin/login');
                 return;
             }
+
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('is_admin')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profileError || !profileData?.is_admin) {
+                router.push('/admin/login');
+                return;
+            }
+
             await fetchData();
         };
         checkAuth();
@@ -33,53 +45,40 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
         try {
-            // Note: In a real production app with RLS, the 'anon' key cannot fetch all users.
-            // For this hackathon demo, we either assume RLS is open OR we fallback to a mock view if fetch fails.
+            const [statsResult, scansResult] = await Promise.all([
+                supabase.rpc('get_admin_stats'),
+                supabase.rpc('get_recent_scans', { limit_count: 5 }),
+            ]);
 
-            // 1. Fetch Users Count (Profiles)
-            const { count: userCount, error: userError } = await supabase
-                .from('profiles')
-                .select('*', { count: 'exact', head: true });
-
-            // 2. Fetch Scans Count
-            const { count: scanCount, error: scanError } = await supabase
-                .from('product_history')
-                .select('*', { count: 'exact', head: true });
-
-            // 3. Fetch Recent Scans
-            const { data: scans, error: scansError } = await supabase
-                .from('product_history')
-                .select('*, profiles(name)')
-                .order('analysis_date', { ascending: false })
-                .limit(5);
-
-            if (userError || scanError) {
-                console.warn("RLS blocking admin view. Switching to simulated data for demo.");
-                // Fallback for demo if RLS blocks
+            if (statsResult.error || scansResult.error) {
+                console.warn('Admin RPC calls failed. Falling back to demo data.', statsResult.error || scansResult.error);
+                setIsDemoData(true);
                 setStats({ users: 142, scans: 856, ingredients: 3240 });
                 setRecentScans([
-                    { id: 1, product_name: 'Hydrating Cleanser', profiles: { name: 'Demo User 1' }, analysis_date: new Date().toISOString(), suitability_score: 92 },
-                    { id: 2, product_name: 'Night Cream', profiles: { name: 'Demo User 2' }, analysis_date: new Date(Date.now() - 86400000).toISOString(), suitability_score: 45 },
-                    { id: 3, product_name: 'Sunscreen A', profiles: { name: 'Demo User 1' }, analysis_date: new Date(Date.now() - 100000000).toISOString(), suitability_score: 78 },
+                    { id: 1, product_name: 'Hydrating Cleanser', profile_name: 'Demo User 1', analysis_date: new Date().toISOString(), suitability_score: 92 },
+                    { id: 2, product_name: 'Night Cream', profile_name: 'Demo User 2', analysis_date: new Date(Date.now() - 86400000).toISOString(), suitability_score: 45 },
+                    { id: 3, product_name: 'Sunscreen A', profile_name: 'Demo User 1', analysis_date: new Date(Date.now() - 100000000).toISOString(), suitability_score: 78 },
                 ]);
             } else {
+                const statsRow = statsResult.data?.[0];
                 setStats({
-                    users: userCount || 0,
-                    scans: scanCount || 0,
-                    ingredients: 0 // Placeholder
+                    users: statsRow?.total_users || 0,
+                    scans: statsRow?.total_scans || 0,
+                    ingredients: statsRow?.total_unique_ingredients || 0,
                 });
-                setRecentScans(scans || []);
+                setRecentScans(scansResult.data || []);
             }
         } catch (e) {
             console.error(e);
+            setIsDemoData(true);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('isAdmin');
-        router.push('/');
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/admin/login');
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading Admin Panel...</div>;
@@ -99,6 +98,13 @@ export default function AdminDashboard() {
             </nav>
 
             <main className="max-w-7xl mx-auto px-6 py-12">
+                {isDemoData && (
+                    <div className="mb-8 flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-700">
+                        <AlertTriangle size={20} className="shrink-0" />
+                        <span className="text-sm font-medium">Showing demo data — live admin data unavailable.</span>
+                    </div>
+                )}
+
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -113,7 +119,6 @@ export default function AdminDashboard() {
                     <div className="lg:col-span-2 space-y-6">
                         <div className="flex justify-between items-center">
                             <h2 className="text-xl font-bold">Live Activity Feed</h2>
-                            <Button variant="outline" size="sm">Export Data</Button>
                         </div>
                         <div className="space-y-4">
                             {recentScans.map((scan, i) => (
@@ -126,11 +131,10 @@ export default function AdminDashboard() {
                                         <div>
                                             <p className="font-bold">{scan.product_name || 'Unknown Product'}</p>
                                             <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                                                Scanned by {scan.profiles?.name || 'Anonymous'} • {new Date(scan.analysis_date).toLocaleDateString()}
+                                                Scanned by {scan.profile_name || scan.profiles?.name || 'Anonymous'} • {new Date(scan.analysis_date).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
-                                    <Button variant="ghost" size="sm">Details</Button>
                                 </Card>
                             ))}
                         </div>

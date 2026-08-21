@@ -8,11 +8,14 @@ import os
 from scipy.sparse import hstack
 from fastapi.middleware.cors import CORSMiddleware
 
+import scraper
+import gemini_fallback
+
 app = FastAPI(title="CUTIeS-IQ ML Inference API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=os.environ.get("ALLOWED_ORIGINS", "http://localhost:3005").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,7 +30,14 @@ annex_ii_data = None
 annex_iii_data = None
 
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "models")
-DATA_DIR = r"C:\Users\rishi\OneDrive\Desktop\dataset ( cuties V2)"
+# Default resolves to ml_service/../../v2_as_ML_finalproject/dataset_for_v2, i.e. the
+# dataset checked into the repo alongside this service (ml_service and
+# v2_as_ML_finalproject are siblings under "version 2/"). Override with COSING_DATA_DIR
+# for other layouts/deployments.
+DATA_DIR = os.environ.get(
+    "COSING_DATA_DIR",
+    os.path.join(os.path.dirname(__file__), "..", "..", "v2_as_ML_finalproject", "dataset_for_v2"),
+)
 
 class IngredientRequest(BaseModel):
     inci_name: str
@@ -59,29 +69,38 @@ async def load_models():
         
     print("Loading regulatory data for safety checks...")
     try:
-        # Load Annex II (Prohibited) and Annex III (Restricted)
-        annex_ii = pd.read_excel(os.path.join(DATA_DIR, "COSING_Annex_II_v2.xls"))
-        annex_iii = pd.read_excel(os.path.join(DATA_DIR, "COSING_Annex_III_v2.xls"))
-        
+        # These .xls files are legacy BIFF exports that xlrd rejects outright
+        # ("Workbook corruption: seen[2] == 4") even though they aren't actually corrupt --
+        # python-calamine reads them fine. The real header row (Reference Number / Chemical
+        # name / INN / CAS Number / ...) is row index 7 (0-based) in both files; rows above
+        # that are title/metadata rows (file creation date, annex title, etc.), which is why
+        # header=7 is required rather than the default header=0.
+        annex_ii = pd.read_excel(
+            os.path.join(DATA_DIR, "COSING_Annex_II_v2.xls"), engine="calamine", header=7
+        )
+        annex_iii = pd.read_excel(
+            os.path.join(DATA_DIR, "COSING_Annex_III_v2.xls"), engine="calamine", header=7
+        )
+
         # Clean up column names for easier access
         annex_ii.columns = annex_ii.columns.str.strip()
         annex_iii.columns = annex_iii.columns.str.strip()
-        
+
         # Build dictionaries for fast lookup
-        # We index by Chemical name/INCI name (usually Chemical name is more prominent in these docs)
+        # Note the column is "Chemical name / INN" (spaces around the slash) in the source files.
         annex_ii_data = {}
         for _, row in annex_ii.iterrows():
-            chem_name = str(row.get('Chemical name/INN', '')).strip().upper()
+            chem_name = str(row.get('Chemical name / INN', '')).strip().upper()
             if chem_name and chem_name != 'NAN':
-                annex_ii_data[chem_name] = f"Ref: {row.get('Reference number', 'N/A')}"
-                
+                annex_ii_data[chem_name] = f"Ref: {row.iloc[0]}"
+
         annex_iii_data = {}
         for _, row in annex_iii.iterrows():
-            chem_name = str(row.get('Chemical name/INN', '')).strip().upper()
+            chem_name = str(row.get('Chemical name / INN', '')).strip().upper()
             if chem_name and chem_name != 'NAN':
                 restrictions = f"Max: {row.get('Maximum concentration in ready for use preparation', 'N/A')}. Conditions: {row.get('Other', 'N/A')}"
                 annex_iii_data[chem_name] = restrictions
-                
+
         print(f"Loaded {len(annex_ii_data)} prohibited substances and {len(annex_iii_data)} restricted substances.")
     except Exception as e:
         print(f"Failed to load regulatory data. Error: {e}")
@@ -165,6 +184,60 @@ async def analyze_ingredient(req: IngredientRequest):
         prohibited_details=prohibited_details,
         safety_score=safety_score
     )
+
+class UserContext(BaseModel):
+    skin_type: str | None = None
+    goals: List[Dict[str, Any]] = []
+    allergies: List[str] = []
+    history: List[Dict[str, Any]] = []
+
+class UnknownIngredientRequest(BaseModel):
+    inci_name: str
+    description: str = ""
+    user_context: UserContext
+    gemini_api_key: str
+
+class UnknownIngredientResult(BaseModel):
+    inci_name: str
+    effectiveness: int
+    reason: str
+    compatibility: Dict[str, int] | None = None
+    source: str
+    source_url: str | None = None
+
+# Simple in-process cache so the same ingredient isn't re-scraped/re-synthesized on
+# every request. Scoped to the lifetime of this process -- a persistent (Supabase-backed)
+# cache is planned separately on the frontend/integration side.
+_unknown_ingredient_cache: Dict[str, UnknownIngredientResult] = {}
+
+@app.post("/api/ml/analyze-unknown-ingredient", response_model=UnknownIngredientResult)
+async def analyze_unknown_ingredient(req: UnknownIngredientRequest):
+    if not req.gemini_api_key or not req.gemini_api_key.strip():
+        raise HTTPException(status_code=400, detail="gemini_api_key is required")
+
+    cache_key = req.inci_name.strip().lower()
+    if cache_key in _unknown_ingredient_cache:
+        return _unknown_ingredient_cache[cache_key]
+
+    facts = scraper.fetch_ingredient_facts(req.inci_name)
+    insight = gemini_fallback.synthesize_ingredient_insight(
+        req.inci_name,
+        facts,
+        req.user_context.dict(),
+        req.gemini_api_key,
+    )
+
+    result = UnknownIngredientResult(
+        inci_name=req.inci_name,
+        effectiveness=insight["effectiveness"],
+        reason=insight["reason"],
+        compatibility=insight.get("compatibility"),
+        source=insight["source"],
+        source_url=facts.get("source_url") if facts else None,
+    )
+
+    _unknown_ingredient_cache[cache_key] = result
+    return result
 
 @app.get("/health")
 def health_check():

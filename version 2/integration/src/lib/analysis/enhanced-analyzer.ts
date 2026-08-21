@@ -8,7 +8,14 @@ import {
     getRecommendedIngredients
 } from './ingredient-knowledge';
 
-import { MLAnalysisResult, analyzeProductML, getSafeAlternatives } from '../ml-api';
+import {
+    MLAnalysisResult,
+    analyzeProductML,
+    getSafeAlternatives,
+    analyzeUnknownIngredientML,
+    UnknownIngredientAnalysisResult,
+    UnknownIngredientUserContext
+} from '../ml-api';
 
 export interface GoalEffectiveness {
     goal: string;
@@ -18,6 +25,7 @@ export interface GoalEffectiveness {
         name: string;
         effectiveness: number;
         reason: string;
+        source?: 'verified' | 'ai_estimate' | 'ml-classifier';
     }>;
 }
 
@@ -95,11 +103,42 @@ export const analyzeIngredientsWithGoals = async (
                 baseAnalysis.explanation += ` WARNING: ${productTypeWarning}`;
             }
 
+            // The ML classifier signals "no confident prediction" for an ingredient by
+            // returning predicted_functions === ['UNKNOWN']. For those, fall back to the
+            // Gemini-backed unknown-ingredient route (verified/AI-estimate) so we still
+            // get a usable effectiveness signal instead of silently dropping them.
+            const unknownIngredientPredictions = mlPredictions.filter(
+                p => p.predicted_functions.length === 1 && p.predicted_functions[0] === 'UNKNOWN'
+            );
+
+            let unknownIngredientResults: UnknownIngredientAnalysisResult[] = [];
+            if (unknownIngredientPredictions.length > 0) {
+                const userContext: UnknownIngredientUserContext = {
+                    skin_type: userProfile?.skin_type ?? null,
+                    goals: userGoals.map(g => ({ goal_name: g.goal_name, priority: g.priority })),
+                    allergies: allergies || [],
+                    history: (history || []).map((h: any) => ({
+                        ingredient_name: h.ingredient_name,
+                        reaction: h.reaction
+                    })),
+                };
+
+                const results = await Promise.all(
+                    unknownIngredientPredictions.map(p =>
+                        analyzeUnknownIngredientML(p.inci_name, '', userContext)
+                    )
+                );
+                unknownIngredientResults = results.filter(
+                    (r): r is UnknownIngredientAnalysisResult => r !== null
+                );
+            }
+
             // --- STRICT ML GOAL SCORING (NO FAKING) ---
             if (userGoals.length > 0) {
                 goalEffectiveness = userGoals.map(goal => calculateMLGoalEffectiveness(
                     goal,
-                    mlPredictions!
+                    mlPredictions!,
+                    unknownIngredientResults
                 ));
 
                 // Calculate ML goal-specific score based on priority weighting
@@ -448,12 +487,14 @@ const ML_GOAL_MAPPING: Record<string, string[]> = {
 
 function calculateMLGoalEffectiveness(
     goal: UserGoal,
-    mlPredictions: MLAnalysisResult[]
+    mlPredictions: MLAnalysisResult[],
+    unknownIngredientResults: UnknownIngredientAnalysisResult[] = []
 ): GoalEffectiveness {
     const matchingIngredients: Array<{
         name: string;
         effectiveness: number;
         reason: string;
+        source?: 'verified' | 'ai_estimate' | 'ml-classifier';
     }> = [];
 
     // Find what dataset functions satisfy this specific user goal
@@ -475,12 +516,28 @@ function calculateMLGoalEffectiveness(
             matchingIngredients.push({
                 name: pred.inci_name,
                 effectiveness: effectiveness,
-                reason: `Dataset mapped ML Function(s): ${matchedFunctions.join(', ')}`
+                reason: `Dataset mapped ML Function(s): ${matchedFunctions.join(', ')}`,
+                source: pred.source || 'ml-classifier'
             });
 
             totalScore += effectiveness;
             count++;
         }
+    });
+
+    // Fold in ingredients the classifier couldn't confidently place (predicted_functions
+    // === ['UNKNOWN']) that were resolved via the Gemini-backed unknown-ingredient route.
+    // These flow through the exact same averaging/curve below as classifier matches.
+    unknownIngredientResults.forEach(result => {
+        matchingIngredients.push({
+            name: result.inci_name,
+            effectiveness: result.effectiveness,
+            reason: result.reason,
+            source: result.source
+        });
+
+        totalScore += result.effectiveness;
+        count++;
     });
 
     // Score is average confidence of contributing ingredients

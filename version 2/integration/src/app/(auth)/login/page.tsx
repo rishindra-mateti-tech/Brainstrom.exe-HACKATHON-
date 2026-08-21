@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button, Input, Card } from '@/components/ui/base';
 import { Logo } from '@/components/ui/Logo';
-import { Mail, Facebook, Apple } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -40,12 +40,7 @@ export default function LoginPage() {
         }
     };
 
-    const handleOAuth = async (provider: 'google' | 'facebook' | 'apple' | 'azure') => {
-        if (provider !== 'google') {
-            setError(`${provider === 'azure' ? 'Microsoft' : provider.charAt(0).toUpperCase() + provider.slice(1)} login is coming soon! Please continue with Google for now.`);
-            return;
-        }
-
+    const handleOAuth = async (provider: 'google') => {
         try {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
@@ -131,21 +126,9 @@ export default function LoginPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" onClick={() => handleOAuth('google')} className="gap-2">
+                <div className="grid grid-cols-1 gap-3">
+                    <Button variant="outline" onClick={() => handleOAuth('google')} className="gap-2 w-full">
                         <Mail className="w-4 h-4" /> Google
-                    </Button>
-                    <Button variant="outline" onClick={() => handleOAuth('facebook')} className="gap-2">
-                        <Facebook className="w-4 h-4" /> Facebook
-                    </Button>
-                    <Button variant="outline" onClick={() => handleOAuth('apple')} className="gap-2">
-                        <Apple className="w-4 h-4" /> Apple
-                    </Button>
-                    <Button variant="outline" onClick={() => handleOAuth('azure')} className="gap-2">
-                        <svg className="w-4 h-4" viewBox="0 0 23 23" fill="currentColor">
-                            <path d="M0 0h10.931v10.931H0zm12.069 0H23v10.931H12.069zM0 12.069h10.931V23H0zm12.069 0H23V23H12.069z" />
-                        </svg>
-                        Microsoft
                     </Button>
                 </div>
             </Card>
