@@ -2,18 +2,28 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+# This Dockerfile expects the BUILD CONTEXT to be "version_2/" (the parent of both
+# integration/ml_service and v2_as_ML_finalproject), not ml_service/ itself --
+# training needs the CosIng CSV, and the regulatory safety check needs the Annex
+# .xls files, both of which live in the sibling v2_as_ML_finalproject/ folder.
+# On Render: set "Docker Build Context Directory" to version_2, and
+# "Dockerfile Path" to version_2/integration/ml_service/Dockerfile.
+
+COPY integration/ml_service/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY integration/ml_service/ ./
+COPY v2_as_ML_finalproject/dataset_for_v2/ ./dataset/
 
-# NOTE: Trained model artifacts (models/ingredient_function_classifier.pkl,
-# models/mlb_functions.pkl, models/tfidf_name.pkl, models/tfidf_desc.pkl) must already
-# exist in ./models within this build context -- they are copied in by the `COPY . .`
-# above along with the rest of the service. Run train.py (see README.md) before
-# building this image if they aren't present yet; the service will start but
-# /health will report models_loaded: false and /api/ml/analyze-ingredient will fail
-# with 503 if they're missing.
+# Train fresh at build time. The trained classifier is ~100MB+, too large to commit
+# to git (GitHub's 100MB hard limit) -- training during the image build avoids ever
+# needing to check the binary artifact in, and keeps it reproducible from source.
+RUN python train.py --data-dir ./dataset --output-dir ./models
+
+# main.py's default COSING_DATA_DIR assumes ml_service and v2_as_ML_finalproject are
+# siblings on disk (true locally, not true in this flattened image layout), so point
+# it explicitly at where we copied the dataset above.
+ENV COSING_DATA_DIR=/app/dataset
 
 EXPOSE 8000
 
