@@ -22,7 +22,8 @@ import requests
 GEMINI_ENDPOINT = (
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
 )
-REQUEST_TIMEOUT = 15  # seconds; LLM calls are slower than the scraper's simple GETs
+REQUEST_TIMEOUT = 25  # seconds; LLM calls are slower than the scraper's simple GETs,
+# especially on a free-tier CPU -- give real headroom rather than timing out early.
 
 _EXPECTED_COMPATIBILITY_KEYS = ("oily", "dry", "combination", "sensitive", "normal")
 
@@ -109,7 +110,13 @@ def synthesize_ingredient_insight(
 
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"response_mime_type": "application/json"},
+        "generationConfig": {
+            "response_mime_type": "application/json",
+            # This model has "thinking" (extended reasoning) on by default, which adds
+            # several extra seconds of latency for no real benefit on a straightforward
+            # structured-output task like this one -- turn it off.
+            "thinkingConfig": {"thinkingBudget": 0},
+        },
     }
 
     try:
