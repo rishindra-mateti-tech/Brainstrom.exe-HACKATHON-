@@ -33,3 +33,5 @@ The `version_2 / integration` folder is the actively developed and deployed appl
 - **ML backend**: [cutis-iq-ml.onrender.com](https://cutis-iq-ml.onrender.com) (free-tier, spins down after 15 min idle — first request after a while may take 30-60s to wake up)
 
 The Supabase database is kept awake automatically by a scheduled GitHub Actions workflow (`.github/workflows/supabase-keepalive.yml`), so the "database pauses after a week of inactivity" issue that used to affect this project is resolved — no need to email anyone to wake it up anymore.
+
+The production hardening and deployment of this version (real auth, admin security, the ML backend fixes and deployment, the AI-assisted unknown-ingredient fallback, BYOK, and the live infrastructure) was done solely by **Rishindra Mateti**, separate from the original hackathon team credited in `version_2/integration/README.md` for v1.

@@ -6,6 +6,8 @@ CUTIeS-IQ is a high-performance skincare analysis platform that leverages comput
 
 🌐 **Live**: [cuties-iq.vercel.app](https://cuties-iq.vercel.app) · ML backend: [cutis-iq-ml.onrender.com](https://cutis-iq-ml.onrender.com)
 
+> **Solo work note**: the production hardening and deployment of this version — real auth, admin security, the `ml_service` backend fixes and deployment, the unknown-ingredient scrape+Gemini fallback, BYOK, and the Vercel/Render/Supabase infrastructure — was built solely by **Rishindra Mateti**, independent of the original hackathon team credited below for v1.
+
 ---
 
 ## 🌟 Key Features
