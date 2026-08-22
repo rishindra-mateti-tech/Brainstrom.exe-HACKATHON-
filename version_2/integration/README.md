@@ -1,4 +1,4 @@
-# CUTIeS-IQ — Deployed Ingredient Intelligence System
+# CUTIeS-IQ: Deployed Ingredient Intelligence System
 
 AI-assisted skincare platform that evaluates cosmetic ingredients against a trained classifier, a user's skin profile, and real-time climate data, instead of relying on marketing claims.
 

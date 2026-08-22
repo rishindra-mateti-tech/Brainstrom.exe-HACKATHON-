@@ -1,4 +1,4 @@
-# CUTIeS-IQ — Version 1 (Hackathon Prototype)
+# CUTIeS-IQ: Version 1 (Hackathon Prototype)
 
 **AI-Powered Skincare Intelligence Platform**
 
@@ -7,17 +7,17 @@ CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product in
 ## Features
 
 **Core**
-- OCR ingredient analysis — upload a product photo and extract the ingredient list automatically
-- Priority-based goals — up to 3 weighted priority levels for skincare objectives
-- Smart recommendations — suitability scoring based on the user's profile
-- History tracking — track and compare previously analyzed products
-- Allergy alerts — automatic flagging of ingredients the user is sensitive to
-- Climate intelligence — recommendations adjusted for the user's environment
+- OCR ingredient analysis: upload a product photo and extract the ingredient list automatically
+- Priority-based goals: up to 3 weighted priority levels for skincare objectives
+- Smart recommendations: suitability scoring based on the user's profile
+- History tracking: track and compare previously analyzed products
+- Allergy alerts: automatic flagging of ingredients the user is sensitive to
+- Climate intelligence: recommendations adjusted for the user's environment
 
 **Advanced**
-- Ingredient memory — learns from past reactions to specific ingredients
-- Goal effectiveness scoring — shows how well a product aligns with each priority goal
-- Priority weighting — P1 (50%), P2 (37%), P3 (13%) for product evaluation
+- Ingredient memory: learns from past reactions to specific ingredients
+- Goal effectiveness scoring: shows how well a product aligns with each priority goal
+- Priority weighting: P1 (50%), P2 (37%), P3 (13%) for product evaluation
 - Light/dark theme
 
 ## Tech Stack
@@ -60,15 +60,15 @@ Visit `http://localhost:3000`.
 
 ## Database Schema
 
-- `profiles` — user skin profiles
-- `product_history` — analysis history
-- `allergies` — user allergen tracking
-- `ingredient_feedback` — reaction memory
-- `user_goals` — priority-based goals
+- `profiles`: user skin profiles
+- `product_history`: analysis history
+- `allergies`: user allergen tracking
+- `ingredient_feedback`: reaction memory
+- `user_goals`: priority-based goals
 
 ## Hackathon Team
 
-**Hack Squad** — Russ 158
+**Hack Squad**, Russ 158
 
 1. Rishindra Mateti - [mateti.7@wright.edu](mailto:mateti.7@wright.edu)
 2. Lohitha Donuri - [lohith.3@wright.edu](mailto:lohith.3@wright.edu)
