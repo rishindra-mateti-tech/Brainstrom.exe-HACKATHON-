@@ -104,9 +104,3 @@ Stored across several relational tables in Supabase (see `supabase/*.sql` for th
 - `ingredient_feedback`: Crowdsourced/personal reaction memory.
 - `skincare_goals`: User-defined priorities for the scoring algorithm.
 - `user_api_keys`: Encrypted per-user BYOK API keys (`user_api_keys.sql`).
-
----
-
-## Credits
-
-Built for the Make-IT-Wright Hackathon 2026 ("Hack Squad," Russ 158): Rishindra Mateti, Lohitha Donuri, Akanksha Padigapati, Varshitha Chennu, Mohith Kovvuri. Winner, **"Most Likely to Ship" Award (Reynolds & Reynolds)**.
