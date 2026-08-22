@@ -33,3 +33,11 @@ Full details: [version_2/integration/README.md](./version_2/integration/README.m
 
 - App: [cuties-iq.vercel.app](https://cuties-iq.vercel.app)
 - ML backend: [cutis-iq-ml.onrender.com](https://cutis-iq-ml.onrender.com)
+
+## Credits
+
+| Stage | Contributors |
+|---|---|
+| [Version 1 (Hackathon)](./version_1/README.md) | Rishindra Mateti, Lohitha Donuri, Akanksha Padigapati, Varshitha Chennu, Mohith Kovvuri |
+| [Version 2 (Training)](./version_2/v2_as_ML_finalproject/README.md) | Rishindra Mateti, Surya Thota, Tejaswi Reddy Kancharla |
+| [Version 2 (Integration)](./version_2/integration/README.md) | Rishindra Mateti |
