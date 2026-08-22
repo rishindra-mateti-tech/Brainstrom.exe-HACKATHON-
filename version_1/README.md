@@ -1,26 +1,26 @@
-# CUTIeS-IQ 🧴✨
+# CUTIeS-IQ — Version 1 (Hackathon Prototype)
 
 **AI-Powered Skincare Intelligence Platform**
 
-CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product ingredients based on your unique skin profile, climate, and personal skincare goals. Built for the Make-it-Wright Hackathon.
+CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product ingredients based on a user's skin profile, climate, and personal skincare goals. Built in 24 hours for the Make-IT-Wright Hackathon 2026.
 
-## 🌟 Features
+## Features
 
-### Core Functionality
-- **🔍 OCR Ingredient Analysis** - Upload product photos and extract ingredient lists automatically
-- **🎯 Priority-Based Goals** - Set up to 3 priority levels for your skincare objectives
-- **🧠 Smart Recommendations** - AI-powered suitability scoring based on your profile
-- **📊 History Tracking** - Track and compare products you've analyzed
-- **⚠️ Allergy Alerts** - Automatic flagging of ingredients you're sensitive to
-- **🌡️ Climate Intelligence** - Personalized recommendations based on your environment
+**Core**
+- OCR ingredient analysis — upload a product photo and extract the ingredient list automatically
+- Priority-based goals — up to 3 weighted priority levels for skincare objectives
+- Smart recommendations — suitability scoring based on the user's profile
+- History tracking — track and compare previously analyzed products
+- Allergy alerts — automatic flagging of ingredients the user is sensitive to
+- Climate intelligence — recommendations adjusted for the user's environment
 
-### Advanced Features
-- **Ingredient Memory** - Learn from your past reactions to specific ingredients
-- **Goal Effectiveness Scoring** - See how well products align with each priority goal
-- **Priority Weighting** - P1 (50%), P2 (37%), P3 (13%) for precise product evaluation
-- **Dark/Light Mode** - Beautiful pink/white light theme and cyan dark theme
+**Advanced**
+- Ingredient memory — learns from past reactions to specific ingredients
+- Goal effectiveness scoring — shows how well a product aligns with each priority goal
+- Priority weighting — P1 (50%), P2 (37%), P3 (13%) for product evaluation
+- Light/dark theme
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
@@ -29,60 +29,46 @@ CUTIeS-IQ is an intelligent skincare analysis platform that evaluates product in
 - **Authentication**: Supabase Auth
 - **OCR**: Tesseract.js
 - **UI Components**: shadcn/ui
--  **APIs**: Open-Meteo, IPAPI
+- **APIs**: Open-Meteo, IPAPI
 - **Animations**: Framer Motion
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+ and npm
-- Supabase account
+- A Supabase account
 
 ### Installation
 
-1. **Clone the repository**
 ```bash
 git clone https://github.com/rishindra-mateti-tech/Brainstrom.exe-HACKATHON-.git
-cd CutisIQ
-```
-
-2. **Install dependencies**
-```bash
+cd Brainstrom.exe-HACKATHON-/version_1
 npm install
 ```
 
-3. **Environment Setup**
-Create `.env.local` file:
+Create a `.env.local` file:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-4. **Run development server**
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000`
+Visit `http://localhost:3000`.
 
-## 📦 Database Setup
+## Database Schema
 
-The app uses Supabase with the following tables:
-- `profiles` - User skin profiles
-- `product_history` - Analysis history
-- `allergies` - User allergen tracking
-- `ingredient_feedback` - Reaction memory
-- `user_goals` - Priority-based goals
+- `profiles` — user skin profiles
+- `product_history` — analysis history
+- `allergies` — user allergen tracking
+- `ingredient_feedback` — reaction memory
+- `user_goals` — priority-based goals
 
-## 🎨 UI Design
+## Hackathon Team
 
-- **Light Mode**: Clean white/gray with pink accents
-- **Dark Mode**: Slate-900 → Blue-950 gradient with cyan accents
-- **Theme**: Matches homepage branding with modern glassmorphism effects
-
-## 🏆 Hackathon Team
-
-**Hack Squad** - Location: Russ 158
+**Hack Squad** — Russ 158
 
 1. Rishindra Mateti - [mateti.7@wright.edu](mailto:mateti.7@wright.edu)
 2. Lohitha Donuri - [lohith.3@wright.edu](mailto:lohith.3@wright.edu)
@@ -90,10 +76,4 @@ The app uses Supabase with the following tables:
 4. Varshitha Chennu - [chennu.9@wright.edu](mailto:chennu.9@wright.edu)
 5. Mohith Kovvuri - [kovvuri.6@wright.edu](mailto:kovvuri.6@wright.edu)
 
-## 📄 License
-
-Built for Make - It - Wright hackathon 2026
-
-## 🙏 Acknowledgments
-
-Special thanks to Wright State University and Make-It_Wright Hackathon organizers!
+Winner, "Most Likely to Ship" Award (Reynolds & Reynolds), Make-IT-Wright Hackathon 2026, Wright State University.
