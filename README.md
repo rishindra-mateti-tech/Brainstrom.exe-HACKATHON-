@@ -24,5 +24,3 @@ You can find the app in the `version_2 / integration` folder, and the ML coursew
 ### 🌐 Live App
 - **App**: [cuties-iq.vercel.app](https://cuties-iq.vercel.app)
 - **ML backend**: [cutis-iq-ml.onrender.com](https://cutis-iq-ml.onrender.com)
-
-The Supabase database is kept awake automatically by a scheduled GitHub Actions workflow (`.github/workflows/supabase-keepalive.yml`), so the "database pauses after a week of inactivity" issue that used to affect this project is resolved, no need to email anyone to wake it up anymore.
