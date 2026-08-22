@@ -82,15 +82,21 @@ def train_model(df, output_dir):
     # (no max_depth) produced a ~660MB pickle -- too large for free-tier hosting memory
     # limits. Capping max_depth/min_samples_leaf and trimming n_estimators keeps accuracy
     # close to the unconstrained baseline while cutting the artifact down drastically.
+    #
+    # IMPORTANT: n_jobs=-1 on BOTH MultiOutputClassifier and RandomForestClassifier
+    # multiplies parallelism (one process per label x one process per tree job each),
+    # which blew past 8GB and OOM'd on a constrained CI/build machine. Parallelize at
+    # only one level and cap it explicitly so peak memory stays bounded regardless of
+    # how many cores the build host reports.
     base_rf = RandomForestClassifier(
         n_estimators=50,
         max_depth=20,
         min_samples_leaf=2,
-        n_jobs=-1,
+        n_jobs=2,
         random_state=42,
         class_weight='balanced',
     )
-    model = MultiOutputClassifier(base_rf, n_jobs=-1)
+    model = MultiOutputClassifier(base_rf, n_jobs=1)
     
     model.fit(X_train, y_train)
     
