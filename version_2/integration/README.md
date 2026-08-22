@@ -6,7 +6,7 @@ CUTIeS-IQ is a high-performance skincare analysis platform that leverages comput
 
 🌐 **Live**: [cuties-iq.vercel.app](https://cuties-iq.vercel.app) · ML backend: [cutis-iq-ml.onrender.com](https://cutis-iq-ml.onrender.com)
 
-> **Solo work note**: the production hardening and deployment of this version — real auth, admin security, the `ml_service` backend fixes and deployment, the unknown-ingredient scrape+Gemini fallback, BYOK, and the Vercel/Render/Supabase infrastructure — was built solely by **Rishindra Mateti**, independent of the original hackathon team credited below for v1.
+**Latest fixes (Rishindra Mateti)**: this version had sat untouched for months — the login page still had three OAuth buttons that didn't actually do anything, the admin panel was gated by a hardcoded password, and the ML backend's safety check was silently failing so it wasn't actually catching prohibited ingredients. Went through it end to end: cleaned up auth, put real admin security behind a database-checked role instead of a client-side flag, tracked down why the regulatory data wasn't loading, retrained the classifier so it would actually fit on a free-tier host, added a scrape-and-AI fallback for ingredients the model doesn't recognize (clearly labeled so it's never mistaken for a verified result), and got the whole thing properly deployed and talking to each other again on Vercel, Render, and Supabase.
 
 ---
 
