@@ -2,11 +2,13 @@
 
 **AI-Powered Skincare Intelligence Platform**
 
-CUTIeS-IQ is a high-performance skincare analysis platform that leverages computer vision, a trained ingredient-function classifier, and environmental intelligence to evaluate product ingredients. Built for the **Brainstrom.exe Hackathon 2026**, it provides hyper-personalized suitability scores based on user skin profiles, real-time climate data, and weighted skincare goals.
+CUTIeS-IQ is a high-performance skincare analysis platform that leverages computer vision, a trained ingredient-function classifier, and environmental intelligence to evaluate product ingredients. It started as a hackathon prototype and was rebuilt here into a real ML-backed product, hyper-personalizing suitability scores based on user skin profiles, real-time climate data, and weighted skincare goals.
 
 🌐 **Live**: [cuties-iq.vercel.app](https://cuties-iq.vercel.app) · ML backend: [cutis-iq-ml.onrender.com](https://cutis-iq-ml.onrender.com)
 
-**Latest fixes (Rishindra Mateti)**: this version had sat untouched for months — the login page still had three OAuth buttons that didn't actually do anything, the admin panel was gated by a hardcoded password, and the ML backend's safety check was silently failing so it wasn't actually catching prohibited ingredients. Went through it end to end: cleaned up auth, put real admin security behind a database-checked role instead of a client-side flag, tracked down why the regulatory data wasn't loading, retrained the classifier so it would actually fit on a free-tier host, added a scrape-and-AI fallback for ingredients the model doesn't recognize (clearly labeled so it's never mistaken for a verified result), and got the whole thing properly deployed and talking to each other again on Vercel, Render, and Supabase.
+**Built and maintained by Rishindra Mateti.** This version started as a university Machine Learning course project — training a real ingredient-function classifier (TF-IDF + RandomForest) on the EU's public CosIng database instead of relying on a static lookup table, then comparing baseline models and optimizing the pipeline with a Class Sparsity Reduction Strategy for the imbalanced data. The course required submitting as a group of at least three, so two teammates joined and put together the presentation deck — the modeling, the engineering, and everything in this repository was built solo.
+
+Out of genuine interest in the project, work didn't stop when the class ended — it continued well past graduation, turning the coursework notebook into an actually-deployed product. That meant going back through the whole app and fixing what months of dormancy had left broken: OAuth buttons that didn't do anything, an admin panel secured by nothing more than a hardcoded password, and a regulatory safety check that was silently failing so it wasn't catching prohibited ingredients at all. Beyond fixing what was there: retrained the classifier so it would actually fit on a free-tier host, built a scrape-and-Gemini fallback for ingredients the model doesn't recognize (clearly labeled so it's never mistaken for a verified result), added per-user API key support, and deployed the whole thing end-to-end across Vercel, Render, and Supabase.
 
 ---
 
@@ -123,7 +125,7 @@ The platform stores data across several relational tables in Supabase (see `supa
 
 ---
 
-## 🏆 Hackathon Team: Hack Squad
+## 🏆 Original Hackathon Team (Version 1): Hack Squad
 **Location**: Russ 158
 
 1. **Rishindra Mateti** - [mateti.7@wright.edu](mailto:mateti.7@wright.edu)
