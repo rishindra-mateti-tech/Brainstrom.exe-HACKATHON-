@@ -20,7 +20,7 @@ import json
 import requests
 
 GEMINI_ENDPOINT = (
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
 )
 REQUEST_TIMEOUT = 15  # seconds; LLM calls are slower than the scraper's simple GETs
 
