@@ -22,11 +22,14 @@ We compared several baseline models and eventually optimized our pipeline using 
 
 ### How to navigate the repository
 If you are looking for our ML course project:
-1. Go to the `version 2 / v2_as_ML_finalproject` folder.
+1. Go to the `version_2 / v2_as_ML_finalproject` folder.
 2. Read the README inside that folder for instructions on how to run our Jupyter Notebook.
 3. The dataset and our final `model_training.ipynb` file are all located there.
 
-Additionally, the `version 2 / integration` folder contains an experimental setup demonstrating how these models can be deployed to a web backend.
+The `version_2 / integration` folder is the actively developed and deployed application — a Next.js frontend backed by a real trained ingredient-function classifier (FastAPI service in `ml_service/`), with a scrape-and-AI fallback for ingredients the classifier doesn't recognize.
 
-**Note on Live App Availability:**
-Because our working prototype uses a free-tier Supabase (PostgreSQL) database, the backend automatically pauses after a week of inactivity. If you try to use the live CutisIQ web app and it doesn't work, the database is likely asleep! Please feel free to contact me at **rishindra.tech@gmail.com** and I will gladly wake it up so you can experience it...!
+### 🌐 Live App
+- **App**: [cuties-iq.vercel.app](https://cuties-iq.vercel.app)
+- **ML backend**: [cutis-iq-ml.onrender.com](https://cutis-iq-ml.onrender.com) (free-tier, spins down after 15 min idle — first request after a while may take 30-60s to wake up)
+
+The Supabase database is kept awake automatically by a scheduled GitHub Actions workflow (`.github/workflows/supabase-keepalive.yml`), so the "database pauses after a week of inactivity" issue that used to affect this project is resolved — no need to email anyone to wake it up anymore.
