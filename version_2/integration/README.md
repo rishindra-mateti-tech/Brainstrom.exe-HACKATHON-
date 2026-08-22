@@ -6,9 +6,9 @@ CUTIeS-IQ is a high-performance skincare analysis platform that leverages comput
 
 🌐 **Live**: [cuties-iq.vercel.app](https://cuties-iq.vercel.app) · ML backend: [cutis-iq-ml.onrender.com](https://cutis-iq-ml.onrender.com)
 
-**Built and maintained by Rishindra Mateti.** This version started as a university Machine Learning course project — training a real ingredient-function classifier (TF-IDF + RandomForest) on the EU's public CosIng database instead of relying on a static lookup table, then comparing baseline models and optimizing the pipeline with a Class Sparsity Reduction Strategy for the imbalanced data. The course required submitting as a group of at least three, so two teammates joined and put together the presentation deck — the modeling, the engineering, and everything in this repository was built solo.
+**Built and maintained by Rishindra Mateti.** This version started as a university Machine Learning course project: training a real ingredient-function classifier (TF-IDF + RandomForest) on the EU's public CosIng database instead of relying on a static lookup table, then comparing baseline models and optimizing the pipeline with a Class Sparsity Reduction Strategy for the imbalanced data. The course required submitting as a group of at least three, so two teammates joined and put together the presentation deck. The modeling, the engineering, and everything in this repository was built solo.
 
-Out of genuine interest in the project, work didn't stop when the class ended — it continued well past graduation, turning the coursework notebook into an actually-deployed product. That meant going back through the whole app and fixing what months of dormancy had left broken: OAuth buttons that didn't do anything, an admin panel secured by nothing more than a hardcoded password, and a regulatory safety check that was silently failing so it wasn't catching prohibited ingredients at all. Beyond fixing what was there: retrained the classifier so it would actually fit on a free-tier host, built a scrape-and-Gemini fallback for ingredients the model doesn't recognize (clearly labeled so it's never mistaken for a verified result), added per-user API key support, and deployed the whole thing end-to-end across Vercel, Render, and Supabase.
+Out of genuine interest in the project, work didn't stop when the class ended; it continued well past graduation, turning the coursework notebook into an actually-deployed product. That meant going back through the whole app and fixing what months of dormancy had left broken: OAuth buttons that didn't do anything, an admin panel secured by nothing more than a hardcoded password, and a regulatory safety check that was silently failing so it wasn't catching prohibited ingredients at all. Beyond fixing what was there: retrained the classifier so it would actually fit on a free-tier host, built a scrape-and-Gemini fallback for ingredients the model doesn't recognize (clearly labeled so it's never mistaken for a verified result), added per-user API key support, and deployed the whole thing end-to-end across Vercel, Render, and Supabase.
 
 ---
 
@@ -35,7 +35,7 @@ Out of genuine interest in the project, work didn't stop when the class ended �
 
 ### 🧪 Trained Ingredient Classifier + Regulatory Safety Check
 - **`ml_service`**: a FastAPI service running a scikit-learn model (RandomForest + TF-IDF) trained on the EU's public CosIng cosmetic ingredient database, predicting each ingredient's function and cross-checking it against the CosIng Annex II/III prohibited and restricted substance lists.
-- **Unknown-ingredient fallback**: when the classifier doesn't recognize an ingredient, the app scrapes supplementary facts from INCIDecoder, then has Gemini synthesize a personalized assessment grounded in those facts (or, if none are found, a clearly-caveated AI estimate). Every result is labeled **Verified** or **AI Estimate** in the UI — never presented with false confidence. See [`/legal/data-sources`](https://cuties-iq.vercel.app/legal/data-sources) for the full disclosure.
+- **Unknown-ingredient fallback**: when the classifier doesn't recognize an ingredient, the app scrapes supplementary facts from INCIDecoder, then has Gemini synthesize a personalized assessment grounded in those facts (or, if none are found, a clearly-caveated AI estimate). Every result is labeled **Verified** or **AI Estimate** in the UI, never presented with false confidence. See [`/legal/data-sources`](https://cuties-iq.vercel.app/legal/data-sources) for the full disclosure.
 
 ### 🔑 Bring Your Own API Key (BYOK)
 Users can save their own Gemini/OpenAI/Anthropic API key in **Settings**, encrypted at rest (AES-256-GCM) and never exposed back to the client. Currently only the Gemini key is actually consumed (by the unknown-ingredient fallback above).
@@ -108,7 +108,7 @@ uvicorn main:app --reload --port 8000
 ## 📦 Database Schema
 
 The platform stores data across several relational tables in Supabase (see `supabase/*.sql` for the full migrations):
-- `profiles`: Core user skin profiles, location data, and an `is_admin` flag (server-controlled only — see `admin_schema.sql`).
+- `profiles`: Core user skin profiles, location data, and an `is_admin` flag (server-controlled only; see `admin_schema.sql`).
 - `product_history`: Historical analysis results and scoring.
 - `allergies`: User-defined allergen tracking.
 - `ingredient_feedback`: Crowdsourced/Personal reaction memory.
