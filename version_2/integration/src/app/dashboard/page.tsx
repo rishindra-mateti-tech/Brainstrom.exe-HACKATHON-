@@ -13,7 +13,6 @@ import {
     User,
     Settings,
     LogOut,
-    Sparkles,
     ChevronRight,
     Loader2,
     Clock,
@@ -24,7 +23,13 @@ import {
     Sun,
     Moon,
     Cloud,
-    Brain,
+    FlaskConical,
+    Database,
+    Leaf,
+    Droplet,
+    Fingerprint,
+    Upload,
+    ClipboardPaste,
     Camera
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -44,21 +49,16 @@ export default function Dashboard() {
     const [userName, setUserName] = useState('');
     const [userGoals, setUserGoals] = useState<any[]>([]);
     const [priorityMode, setPriorityMode] = useState(true);
-    const [isV2, setIsV2] = useState(true);
 
     // Analysis state
     const [analyzing, setAnalyzing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<EnhancedAnalysisResult | null>(null);
     const [productName, setProductName] = useState('');
+    const [inputMode, setInputMode] = useState<'upload' | 'paste'>('upload');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [toastMsg, setToastMsg] = useState<string | null>(null);
-
-    const showToast = (msg: string) => {
-        setToastMsg(msg);
-        setTimeout(() => setToastMsg(null), 3000);
-    };
+    const [pastedIngredients, setPastedIngredients] = useState('');
 
     // Theme state
     const [isDark, setIsDark] = useState(false);
@@ -142,14 +142,17 @@ export default function Dashboard() {
     };
 
     const handleStartAnalysis = async () => {
-        if (!selectedFile) return;
+        if (inputMode === 'upload' && !selectedFile) return;
+        if (inputMode === 'paste' && !pastedIngredients.trim()) return;
 
         setAnalyzing(true);
         setError(null);
         setResult(null);
 
         try {
-            const ingredientText = await extractIngredients(selectedFile);
+            const ingredientText = inputMode === 'paste'
+                ? pastedIngredients.trim()
+                : await extractIngredients(selectedFile!);
             console.log("Extracted Text:", ingredientText);
 
             if (!ingredientText) {
@@ -165,8 +168,7 @@ export default function Dashboard() {
                 allergies,
                 reactions,
                 userGoals,
-                priorityMode,
-                isV2
+                priorityMode
             );
 
             setResult(analysis);
@@ -218,23 +220,6 @@ export default function Dashboard() {
                         >
                             {isDark ? <Sun className="text-amber-500" size={20} /> : <Moon className="text-slate-500" size={20} />}
                         </button>
-                        {/* V1/V2 Small Toggle */}
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(var(--muted)/0.5)]">
-                            <span className="text-[10px] font-black tracking-wider uppercase text-slate-500 dark:text-slate-400 hidden sm:block">
-                                {isV2 ? 'V1' : 'V2'}
-                            </span>
-                            <button
-                                onClick={() => {
-                                    const newV2 = !isV2;
-                                    setIsV2(newV2);
-                                    showToast(newV2 ? "Switched to updated ML version 🚀" : "Switched to old rules version ⚙️");
-                                }}
-                                className={`relative w-10 h-5 rounded-full outline-none transition-colors duration-300 ${isV2 ? 'bg-gradient-to-r from-pink-500 to-purple-500 shadow-inner' : 'bg-gray-300 dark:bg-slate-700'}`}
-                            >
-                                <span className={`absolute left-[2px] top-[2px] bg-white w-4 h-4 rounded-full transition-transform duration-300 shadow-sm ${isV2 ? 'translate-x-[20px]' : 'translate-x-0'}`} />
-                            </button>
-                        </div>
-
                         <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-[hsl(var(--muted)/0.5)]">
                             <Cloud size={16} className="text-[hsl(var(--primary))]" />
                             <span className="text-sm font-medium">{profile?.location_city} • {profile?.current_season}</span>
@@ -275,11 +260,11 @@ export default function Dashboard() {
                     <Card className="border border-gray-200 dark:border-cyan-900 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 p-8 shadow-md dark:shadow-none hover:shadow-lg transition-all duration-300">
                         <div className="flex items-center gap-3 mb-8">
                             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 dark:from-cyan-600 dark:to-blue-700 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform duration-300">
-                                <Brain />
+                                <FlaskConical />
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 dark:text-cyan-200">New Product Analysis</h2>
-                                <p className="text-sm text-gray-600 dark:text-cyan-400">Upload a photo of the ingredient label.</p>
+                                <p className="text-sm text-gray-600 dark:text-cyan-400">Upload a photo of the ingredient label, or paste the list directly.</p>
                             </div>
                         </div>
 
@@ -299,72 +284,116 @@ export default function Dashboard() {
                                 </div>
                             )}
 
-                            <div className="relative group">
-                                {!selectedFile ? (
-                                    <>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleFileUpload}
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                            disabled={analyzing}
-                                        />
-                                        <div className={`border-2 border-dashed rounded-3xl p-12 text-center transition-all duration-300 ${analyzing
-                                            ? 'bg-pink-50/50 border-pink-300 dark:bg-cyan-950/20 dark:border-cyan-800'
-                                            : 'border-gray-300 dark:border-cyan-800 hover:border-pink-400 hover:bg-pink-50/30 dark:hover:bg-cyan-900/20 hover:scale-[1.02]'
-                                            }`}>
-                                            <div className="space-y-4">
-                                                <div className="w-16 h-16 bg-gradient-to-br from-pink-100 to-pink-200 dark:from-cyan-900 dark:to-blue-900 rounded-2xl flex items-center justify-center mx-auto text-pink-600 dark:text-cyan-300 group-hover:from-pink-200 group-hover:to-pink-300 dark:group-hover:from-cyan-800 dark:group-hover:to-blue-800 group-hover:scale-110 transition-all duration-300 shadow-lg">
-                                                    <Camera size={32} />
-                                                </div>
-                                                <div>
-                                                    <p className="text-lg font-semibold text-gray-900 dark:text-cyan-100">Drop image or click to upload</p>
-                                                    <p className="text-sm text-gray-600 dark:text-cyan-300">PNG, JPG up to 10MB</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="border border-gray-200 dark:border-cyan-800 rounded-3xl p-6 text-center space-y-6">
-                                        {previewUrl ? (
-                                            <div className="relative w-full h-48 mx-auto rounded-xl overflow-hidden border border-gray-200 dark:border-cyan-800 shadow-inner">
-                                                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                            {/* Upload / Paste Mode Tabs */}
+                            <div className="inline-flex rounded-full bg-[hsl(var(--muted)/0.5)] p-1">
+                                <button
+                                    onClick={() => setInputMode('upload')}
+                                    disabled={analyzing}
+                                    className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors ${inputMode === 'upload' ? 'bg-white dark:bg-slate-800 shadow-sm text-pink-600 dark:text-cyan-300' : 'text-slate-500 dark:text-slate-400'}`}
+                                >
+                                    <Upload size={14} /> Upload Photo
+                                </button>
+                                <button
+                                    onClick={() => setInputMode('paste')}
+                                    disabled={analyzing}
+                                    className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors ${inputMode === 'paste' ? 'bg-white dark:bg-slate-800 shadow-sm text-pink-600 dark:text-cyan-300' : 'text-slate-500 dark:text-slate-400'}`}
+                                >
+                                    <ClipboardPaste size={14} /> Paste Text
+                                </button>
+                            </div>
+
+                            {inputMode === 'paste' ? (
+                                <div className="space-y-4">
+                                    <textarea
+                                        value={pastedIngredients}
+                                        onChange={(e) => setPastedIngredients(e.target.value)}
+                                        disabled={analyzing}
+                                        placeholder="Paste the ingredient list here, e.g. Aqua, Glycerin, Niacinamide, ..."
+                                        className="w-full min-h-[160px] rounded-2xl border border-gray-300 dark:border-cyan-800 bg-white dark:bg-slate-900 p-4 text-sm text-slate-800 dark:text-cyan-100 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-cyan-500"
+                                    />
+                                    <Button
+                                        className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white shadow-md border-0"
+                                        onClick={handleStartAnalysis}
+                                        disabled={analyzing || !pastedIngredients.trim()}
+                                    >
+                                        {analyzing ? (
+                                            <div className="flex items-center gap-2">
+                                                <Loader2 className="animate-spin w-4 h-4" />
+                                                Analyzing...
                                             </div>
                                         ) : (
-                                            <div className="w-full h-48 bg-gray-100 dark:bg-cyan-900/20 rounded-xl flex items-center justify-center shadow-inner text-gray-400">
-                                                <Camera size={32} />
-                                            </div>
+                                            'Start Analyzing'
                                         )}
-                                        <div className="flex gap-4">
-                                            <Button
-                                                variant="outline"
-                                                className="flex-1 border-pink-200 text-pink-700 dark:border-cyan-800 dark:text-cyan-400"
-                                                onClick={() => {
-                                                    setSelectedFile(null);
-                                                    setPreviewUrl(null);
-                                                }}
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="relative group">
+                                    {!selectedFile ? (
+                                        <>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleFileUpload}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                 disabled={analyzing}
-                                            >
-                                                Change Photo
-                                            </Button>
-                                            <Button
-                                                className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white shadow-md border-0"
-                                                onClick={handleStartAnalysis}
-                                                disabled={analyzing}
-                                            >
-                                                {analyzing ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <Loader2 className="animate-spin w-4 h-4" />
-                                                        Reading Label...
+                                            />
+                                            <div className={`border-2 border-dashed rounded-3xl p-12 text-center transition-all duration-300 ${analyzing
+                                                ? 'bg-pink-50/50 border-pink-300 dark:bg-cyan-950/20 dark:border-cyan-800'
+                                                : 'border-gray-300 dark:border-cyan-800 hover:border-pink-400 hover:bg-pink-50/30 dark:hover:bg-cyan-900/20 hover:scale-[1.02]'
+                                                }`}>
+                                                <div className="space-y-4">
+                                                    <div className="w-16 h-16 bg-gradient-to-br from-pink-100 to-pink-200 dark:from-cyan-900 dark:to-blue-900 rounded-2xl flex items-center justify-center mx-auto text-pink-600 dark:text-cyan-300 group-hover:from-pink-200 group-hover:to-pink-300 dark:group-hover:from-cyan-800 dark:group-hover:to-blue-800 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                                        <Camera size={32} />
                                                     </div>
-                                                ) : (
-                                                    'Start Analyzing'
-                                                )}
-                                            </Button>
+                                                    <div>
+                                                        <p className="text-lg font-semibold text-gray-900 dark:text-cyan-100">Drop image or click to upload</p>
+                                                        <p className="text-sm text-gray-600 dark:text-cyan-300">PNG, JPG up to 10MB</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="border border-gray-200 dark:border-cyan-800 rounded-3xl p-6 text-center space-y-6">
+                                            {previewUrl ? (
+                                                <div className="relative w-full h-48 mx-auto rounded-xl overflow-hidden border border-gray-200 dark:border-cyan-800 shadow-inner">
+                                                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                                                </div>
+                                            ) : (
+                                                <div className="w-full h-48 bg-gray-100 dark:bg-cyan-900/20 rounded-xl flex items-center justify-center shadow-inner text-gray-400">
+                                                    <Camera size={32} />
+                                                </div>
+                                            )}
+                                            <div className="flex gap-4">
+                                                <Button
+                                                    variant="outline"
+                                                    className="flex-1 border-pink-200 text-pink-700 dark:border-cyan-800 dark:text-cyan-400"
+                                                    onClick={() => {
+                                                        setSelectedFile(null);
+                                                        setPreviewUrl(null);
+                                                    }}
+                                                    disabled={analyzing}
+                                                >
+                                                    Change Photo
+                                                </Button>
+                                                <Button
+                                                    className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white shadow-md border-0"
+                                                    onClick={handleStartAnalysis}
+                                                    disabled={analyzing}
+                                                >
+                                                    {analyzing ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <Loader2 className="animate-spin w-4 h-4" />
+                                                            Reading Label...
+                                                        </div>
+                                                    ) : (
+                                                        'Start Analyzing'
+                                                    )}
+                                                </Button>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Analysis Result */}
@@ -374,12 +403,12 @@ export default function Dashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="mt-12 p-8 rounded-3xl bg-gradient-to-br from-white via-teal-50/20 to-cyan-50/20 dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 border-2 border-teal-100 dark:border-cyan-900/30 shadow-xl"
                             >
-                                {isV2 ? (
+                                {(
                                     <div className="space-y-12">
                                         {/* ML Base Ingredient Analysis */}
                                         <div className="pt-2">
                                             <h3 className="text-2xl font-black mb-6 flex items-center gap-3 text-purple-600 dark:text-purple-400 uppercase tracking-tighter">
-                                                <Brain size={28} />
+                                                <Database size={28} />
                                                 Ingredient Analysis (Database)
                                             </h3>
                                             <div className="flex flex-col gap-4">
@@ -431,7 +460,7 @@ export default function Dashboard() {
                                             <div className="flex flex-col lg:flex-row gap-8 items-stretch">
                                                 <div className="flex-1 bg-white dark:bg-slate-900 border-2 border-[hsl(var(--primary)/0.2)] dark:border-cyan-900/50 p-8 rounded-3xl shadow-xl relative overflow-hidden group">
                                                     <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
-                                                        <Sparkles size={160} className="text-[hsl(var(--primary))]" />
+                                                        <Leaf size={160} className="text-[hsl(var(--primary))]" />
                                                     </div>
                                                     <div className="text-[1.1rem] leading-loose font-medium relative z-10 text-slate-800 dark:text-slate-200 space-y-6">
                                                         <p>
@@ -491,130 +520,6 @@ export default function Dashboard() {
                                                 {result.recommendations && result.recommendations.filter(r => r.type === 'warning' || r.type === 'ml-insight').length > 0 && (
                                                     <ProductRecommendations recommendations={result.recommendations.filter(r => r.type === 'warning' || r.type === 'ml-insight')} />
                                                 )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-12">
-                                        {/* Top Section: Suitability & Ingredients */}
-                                        <div className="flex flex-col md:flex-row gap-8 items-start">
-                                            {/* Suitability Gauge */}
-                                            <div className="flex flex-col items-center justify-center p-6 bg-white dark:bg-cyan-950/20 rounded-2xl border border-teal-100/50 min-w-[200px] shadow-inner">
-                                                <div className={`w-36 h-36 rounded-full border-[12px] flex flex-col items-center justify-center font-black ${result.suitabilityScore >= 80 ? 'border-green-500 text-green-600' :
-                                                    result.suitabilityScore >= 50 ? 'border-amber-500 text-amber-600' : 'border-red-500 text-red-600'
-                                                    }`}>
-                                                    <span className="text-5xl">{result.suitabilityScore}</span>
-                                                    <span className="text-xs uppercase tracking-widest mt-1 opacity-60">Base</span>
-                                                </div>
-                                                <span className="mt-3 text-[12px] font-black uppercase tracking-[0.4em] text-gray-500">Suitability</span>
-                                            </div>
-
-                                            <div className="flex-1 space-y-4">
-                                                {/* Detected Ingredients - Reusing same component pattern */}
-                                                <div className="p-6 rounded-2xl bg-teal-50/50 dark:bg-cyan-900/20 border border-teal-100 dark:border-cyan-900/30">
-                                                    <div className="flex items-center gap-2 mb-3">
-                                                        <span className="text-xl">🧬</span>
-                                                        <h3 className="font-bold text-slate-800 dark:text-cyan-200">Ingredients Detected</h3>
-                                                    </div>
-                                                    <p className="text-sm font-mono text-slate-600 dark:text-cyan-400 break-words leading-relaxed">
-                                                        {result.extractedIngredients.join(', ')}
-                                                    </p>
-                                                </div>
-
-                                                {/* Personalized Highlights for Skin Type */}
-                                                {result.personalizedInsights && result.personalizedInsights.length > 0 && (
-                                                    <PersonalizedInsights
-                                                        insights={result.personalizedInsights}
-                                                        extractedIngredients={result.extractedIngredients || []}
-                                                        skinType={profile?.skin_type}
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Mid Section: Priority Breakdown & Goal Score */}
-                                        <div className="pt-20 border-t border-teal-100/30">
-                                            <div className="flex flex-col lg:flex-row gap-8 items-start">
-                                                <div className="flex-1 w-full">
-                                                    <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[hsl(var(--primary))] uppercase tracking-tighter">
-                                                        <Brain size={24} />
-                                                        Personalized Goal Impact
-                                                    </h3>
-                                                    <PriorityBreakdown
-                                                        goalEffectiveness={result.goalEffectiveness || []}
-                                                        priorityMode={priorityMode}
-                                                    />
-                                                </div>
-
-                                                {/* Overall Goal Gauge */}
-                                                {result.goalEffectiveness && result.goalEffectiveness.length > 0 && (
-                                                    <div className="flex flex-col items-center justify-center p-6 bg-[hsl(var(--primary)/0.03)] border border-[hsl(var(--primary)/0.2)] rounded-2xl min-w-[200px] shadow-lg lg:mt-24">
-                                                        <div className={`w-36 h-36 rounded-full border-[12px] flex flex-col items-center justify-center font-black ${result.goalScore >= 80 ? 'border-[hsl(var(--primary))] text-[hsl(var(--primary))]' :
-                                                            result.goalScore >= 50 ? 'border-amber-500 text-amber-600' : 'border-red-500 text-red-600'
-                                                            }`}>
-                                                            <span className="text-5xl">{result.goalScore}</span>
-                                                            <span className="text-xs uppercase tracking-widest mt-1 opacity-60">Result</span>
-                                                        </div>
-                                                        <span className="mt-4 text-[14px] font-black uppercase tracking-[0.5em] text-[hsl(var(--primary))]">Overall Match</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Bottom Section: Holistic Verdict & Recommendations */}
-                                        <div className="pt-16 border-t-4 border-double border-teal-100/50">
-                                            <div className="bg-white dark:bg-slate-900 border-2 border-[hsl(var(--primary)/0.2)] dark:border-cyan-900/50 p-8 rounded-3xl shadow-xl relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
-                                                    <Sparkles size={120} className="text-[hsl(var(--primary))]" />
-                                                </div>
-                                                <h3 className="text-2xl font-black mb-4 relative z-10 text-[hsl(var(--primary))] dark:text-cyan-400">Holistic Verdict</h3>
-                                                <div className="text-lg leading-relaxed font-medium relative z-10 text-slate-900 dark:text-slate-100 space-y-4">
-                                                    <p className="font-bold underline decoration-[hsl(var(--primary)/0.3)]">
-                                                        {result.explanation}
-                                                    </p>
-                                                    <p className="text-slate-600 dark:text-slate-400 text-base font-normal">
-                                                        {result.suitabilityExplanation}
-                                                    </p>
-
-                                                    {/* Immediate Explanation (Warnings & Highlights) */}
-                                                    <div className="flex flex-wrap gap-2 pt-2">
-                                                        {result.warnings.map((w, i) => (
-                                                            <div key={i} className="flex-1 min-w-[240px] flex gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-100 font-medium">
-                                                                <AlertCircle size={14} className="shrink-0" />
-                                                                {w}
-                                                            </div>
-                                                        ))}
-                                                        {result.highlights.map((h, i) => (
-                                                            <div key={i} className="flex-1 min-w-[240px] flex gap-2 p-3 rounded-xl bg-green-50 text-green-700 text-xs border border-green-100 font-medium">
-                                                                <CheckCircle size={14} className="shrink-0" />
-                                                                {h}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-8 grid gap-4">
-                                                {result.recommendations && result.recommendations.length > 0 && (
-                                                    <ProductRecommendations recommendations={result.recommendations} />
-                                                )}
-                                            </div>
-
-                                            {/* Ingredient Breakdown Visualizer */}
-                                            <div className="mt-8 pt-8 border-t border-[hsl(var(--border))]">
-                                                <h4 className="text-sm font-bold uppercase tracking-widest opacity-60 mb-4">Rule-Based Breakdown</h4>
-                                                <div className="flex flex-wrap gap-4">
-                                                    {result.categories.map((cat, i) => (
-                                                        <div key={i} className={`p-4 rounded-2xl border ${cat.color} flex flex-col gap-2 min-w-[150px]`}>
-                                                            <span className="text-xs font-bold uppercase tracking-wider opacity-70">{cat.name}</span>
-                                                            <div className="flex flex-wrap gap-1">
-                                                                {cat.ingredients.map((ing, j) => (
-                                                                    <span key={j} className="text-[10px] bg-white/50 px-1.5 py-0.5 rounded uppercase font-bold">{ing}</span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -708,7 +613,7 @@ export default function Dashboard() {
                 <div className="space-y-8">
                     {/* Profile Card */}
                     <Card className="bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 p-8 overflow-hidden relative shadow-md dark:shadow-none border border-gray-200 dark:border-cyan-900 hover:shadow-lg transition-all duration-300">
-                        <Sparkles className="absolute -right-4 -top-4 w-24 h-24 opacity-10 text-pink-300 dark:text-cyan-600" />
+                        <Droplet className="absolute -right-4 -top-4 w-24 h-24 opacity-10 text-pink-300 dark:text-cyan-600" />
                         <div className="relative z-10 space-y-6">
                             <div className="flex items-center gap-4">
                                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 dark:from-cyan-600 dark:to-blue-700 flex items-center justify-center text-3xl font-bold text-white shadow-lg hover:scale-110 transition-transform duration-300">
@@ -736,7 +641,7 @@ export default function Dashboard() {
                     {/* Memory Card */}
                     <Card className="bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 p-6 border border-gray-200 dark:border-cyan-900 shadow-md dark:shadow-none hover:shadow-lg transition-all duration-300">
                         <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-cyan-200">
-                            <Brain size={18} className="text-pink-500 dark:text-cyan-400" /> Ingredient Memory
+                            <Fingerprint size={18} className="text-pink-500 dark:text-cyan-400" /> Ingredient Memory
                         </h3>
                         <div className="space-y-3">
                             {reactions.length === 0 ? (
@@ -759,14 +664,6 @@ export default function Dashboard() {
 
             {/* Disclaimer Badge */}
             <DisclaimerBadge variant="info" position="bottom-right" />
-
-            {/* Custom Toast */}
-            {toastMsg && (
-                <div className="fixed bottom-6 right-6 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-6 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 border border-slate-700 dark:border-slate-300 font-medium">
-                    {toastMsg.includes('ML') ? <Brain size={18} className="text-purple-400" /> : <Settings size={18} className="text-pink-400" />}
-                    {toastMsg}
-                </div>
-            )}
         </div>
     );
 }

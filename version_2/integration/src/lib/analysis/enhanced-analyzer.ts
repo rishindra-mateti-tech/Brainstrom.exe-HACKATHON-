@@ -4,7 +4,6 @@
 import { AnalysisResult, analyzeIngredients } from './analyzer';
 import {
     INGREDIENT_KNOWLEDGE,
-    getIngredientBenefit,
     getRecommendedIngredients
 } from './ingredient-knowledge';
 
@@ -51,7 +50,6 @@ export interface EnhancedAnalysisResult extends AnalysisResult {
     suitabilityExplanation: string;
     goalScore: number;
     mlPredictions?: MLAnalysisResult[];
-    isV2?: boolean;
     averageConfidence?: number;
     productTypeWarning?: string;
 }
@@ -67,8 +65,7 @@ export const analyzeIngredientsWithGoals = async (
     allergies: string[],
     history: any[],
     userGoals: UserGoal[],
-    priorityMode: boolean,
-    isV2: boolean = false
+    priorityMode: boolean
 ): Promise<EnhancedAnalysisResult> => {
     // Get base analysis first
     const baseAnalysis = analyzeIngredients(ingredients, userProfile, allergies, history);
@@ -84,80 +81,62 @@ export const analyzeIngredientsWithGoals = async (
 
     let goalEffectiveness: GoalEffectiveness[] | undefined;
     let goalScore = 0;
-    let mlPredictions: MLAnalysisResult[] | undefined;
     let averageConfidence: number | undefined;
     let productTypeWarning: string | undefined;
 
-    if (isV2) {
-        mlPredictions = await analyzeProductML(ingredientList);
+    const mlPredictions = await analyzeProductML(ingredientList);
 
-        if (mlPredictions.length > 0) {
-            averageConfidence = mlPredictions.reduce((sum: number, p: MLAnalysisResult) => sum + p.confidence_score, 0) / mlPredictions.length;
+    if (mlPredictions.length > 0) {
+        averageConfidence = mlPredictions.reduce((sum: number, p: MLAnalysisResult) => sum + p.confidence_score, 0) / mlPredictions.length;
 
-            // Check for product type warning (e.g. shampoo used on face)
-            productTypeWarning = detectNonSkinProduct(mlPredictions);
+        // Check for product type warning (e.g. shampoo used on face)
+        productTypeWarning = detectNonSkinProduct(mlPredictions);
 
-            if (productTypeWarning) {
-                // Reduce suitability slightly instead of halving it, as cleansers share surfactant functions
-                baseAnalysis.score = Math.max(0, baseAnalysis.score - 15);
-                baseAnalysis.explanation += ` WARNING: ${productTypeWarning}`;
-            }
-
-            // The ML classifier signals "no confident prediction" for an ingredient by
-            // returning predicted_functions === ['UNKNOWN']. For those, fall back to the
-            // Gemini-backed unknown-ingredient route (verified/AI-estimate) so we still
-            // get a usable effectiveness signal instead of silently dropping them.
-            const unknownIngredientPredictions = mlPredictions.filter(
-                p => p.predicted_functions.length === 1 && p.predicted_functions[0] === 'UNKNOWN'
-            );
-
-            let unknownIngredientResults: UnknownIngredientAnalysisResult[] = [];
-            if (unknownIngredientPredictions.length > 0) {
-                const userContext: UnknownIngredientUserContext = {
-                    skin_type: userProfile?.skin_type ?? null,
-                    goals: userGoals.map(g => ({ goal_name: g.goal_name, priority: g.priority })),
-                    allergies: allergies || [],
-                    history: (history || []).map((h: any) => ({
-                        ingredient_name: h.ingredient_name,
-                        reaction: h.reaction
-                    })),
-                };
-
-                const results = await Promise.all(
-                    unknownIngredientPredictions.map(p =>
-                        analyzeUnknownIngredientML(p.inci_name, '', userContext)
-                    )
-                );
-                unknownIngredientResults = results.filter(
-                    (r): r is UnknownIngredientAnalysisResult => r !== null
-                );
-            }
-
-            // --- STRICT ML GOAL SCORING (NO FAKING) ---
-            if (userGoals.length > 0) {
-                goalEffectiveness = userGoals.map(goal => calculateMLGoalEffectiveness(
-                    goal,
-                    mlPredictions!,
-                    unknownIngredientResults
-                ));
-
-                // Calculate ML goal-specific score based on priority weighting
-                if (priorityMode && goalEffectiveness.length > 0) {
-                    goalScore = calculatePriorityWeightedScore(goalEffectiveness);
-                } else if (goalEffectiveness.length > 0) {
-                    goalScore = Math.round(goalEffectiveness.reduce((sum: number, g: GoalEffectiveness) => sum + g.score, 0) / goalEffectiveness.length);
-                }
-            }
+        if (productTypeWarning) {
+            // Reduce suitability slightly instead of halving it, as cleansers share surfactant functions
+            baseAnalysis.score = Math.max(0, baseAnalysis.score - 15);
+            baseAnalysis.explanation += ` WARNING: ${productTypeWarning}`;
         }
-    } else {
-        // --- V1 RULE-BASED GOAL SCORING ---
+
+        // The ML classifier signals "no confident prediction" for an ingredient by
+        // returning predicted_functions === ['UNKNOWN']. For those, fall back to the
+        // Gemini-backed unknown-ingredient route (verified/AI-estimate) so we still
+        // get a usable effectiveness signal instead of silently dropping them.
+        const unknownIngredientPredictions = mlPredictions.filter(
+            p => p.predicted_functions.length === 1 && p.predicted_functions[0] === 'UNKNOWN'
+        );
+
+        let unknownIngredientResults: UnknownIngredientAnalysisResult[] = [];
+        if (unknownIngredientPredictions.length > 0) {
+            const userContext: UnknownIngredientUserContext = {
+                skin_type: userProfile?.skin_type ?? null,
+                goals: userGoals.map(g => ({ goal_name: g.goal_name, priority: g.priority })),
+                allergies: allergies || [],
+                history: (history || []).map((h: any) => ({
+                    ingredient_name: h.ingredient_name,
+                    reaction: h.reaction
+                })),
+            };
+
+            const results = await Promise.all(
+                unknownIngredientPredictions.map(p =>
+                    analyzeUnknownIngredientML(p.inci_name, '', userContext)
+                )
+            );
+            unknownIngredientResults = results.filter(
+                (r): r is UnknownIngredientAnalysisResult => r !== null
+            );
+        }
+
+        // --- STRICT ML GOAL SCORING (NO FAKING) ---
         if (userGoals.length > 0) {
-            goalEffectiveness = userGoals.map(goal => calculateGoalEffectiveness(
+            goalEffectiveness = userGoals.map(goal => calculateMLGoalEffectiveness(
                 goal,
-                ingredientList,
-                userProfile?.skin_type
+                mlPredictions!,
+                unknownIngredientResults
             ));
 
+            // Calculate ML goal-specific score based on priority weighting
             if (priorityMode && goalEffectiveness.length > 0) {
                 goalScore = calculatePriorityWeightedScore(goalEffectiveness);
             } else if (goalEffectiveness.length > 0) {
@@ -173,7 +152,7 @@ export const analyzeIngredientsWithGoals = async (
         goalEffectiveness
     );
 
-    if (isV2 && mlPredictions && mlPredictions.length > 0) {
+    if (mlPredictions && mlPredictions.length > 0) {
         generateMLRecommendations(mlPredictions, recommendationsList);
     }
 
@@ -205,7 +184,6 @@ export const analyzeIngredientsWithGoals = async (
         personalizedInsights,
         goalEffectiveness,
         recommendations: recommendationsList,
-        isV2,
         mlPredictions,
         averageConfidence,
         productTypeWarning
@@ -321,45 +299,6 @@ function generatePersonalizedInsights(
 
     return insights;
 }
-
-function calculateGoalEffectiveness(
-    goal: UserGoal,
-    ingredientList: string[],
-    skinType?: string
-): GoalEffectiveness {
-    const matchingIngredients: Array<{
-        name: string;
-        effectiveness: number;
-        reason: string;
-    }> = [];
-
-    let totalEffectiveness = 0;
-    let count = 0;
-
-    ingredientList.forEach(ingredient => {
-        const benefit = getIngredientBenefit(ingredient, goal.goal_name, skinType);
-
-        if (benefit) {
-            matchingIngredients.push({
-                name: ingredient,
-                effectiveness: benefit.effectiveness,
-                reason: benefit.reason
-            });
-            totalEffectiveness += benefit.effectiveness;
-            count++;
-        }
-    });
-
-    const score = count > 0 ? Math.round(totalEffectiveness / count) : 0;
-
-    return {
-        goal: goal.goal_name,
-        priority: goal.priority,
-        score,
-        matchingIngredients
-    };
-}
-
 
 function calculatePriorityWeightedScore(
     goalEffectiveness: GoalEffectiveness[]

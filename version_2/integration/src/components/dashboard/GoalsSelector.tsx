@@ -364,7 +364,7 @@ export function GoalsSelector({ profileId, onGoalsChange }: GoalsSelectorProps) 
                     {/* Feedback Message */}
                     {priorityMode && [priority1Goal, priority2Goal, priority3Goals.length > 0].filter(Boolean).length === 1 && (
                         <p className="text-center text-xs font-bold text-pink-500 dark:text-cyan-400 animate-pulse mt-4">
-                            ✨ You selected only 1 priority. Weight: 100%
+                            You selected only 1 priority. Weight: 100%
                         </p>
                     )}
                 </div>

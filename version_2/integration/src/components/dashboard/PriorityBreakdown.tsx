@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { GoalEffectiveness } from '@/lib/analysis/enhanced-analyzer';
-import { Target, TrendingUp, Award, Zap, CheckCircle2, Sparkles } from 'lucide-react';
+import { Target, TrendingUp, Award, Zap, CheckCircle2, Info } from 'lucide-react';
 
 interface PriorityBreakdownProps {
     goalEffectiveness: GoalEffectiveness[];
@@ -115,7 +115,7 @@ export function PriorityBreakdown({ goalEffectiveness, priorityMode }: PriorityB
                                                         </span>
                                                     ) : (
                                                         <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-700 border border-amber-200">
-                                                            <Sparkles size={10} /> AI Estimate
+                                                            <Info size={10} /> AI Estimate
                                                         </span>
                                                     )
                                                 )}

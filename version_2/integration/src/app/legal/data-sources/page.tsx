@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/base';
 import { Logo } from '@/components/ui/Logo';
-import { Database, Globe, Sparkles, ArrowLeft } from 'lucide-react';
+import { Database, Globe, Info, ArrowLeft } from 'lucide-react';
 
 export default function DataSourcesPage() {
     return (
@@ -53,7 +53,7 @@ export default function DataSourcesPage() {
                 <section className="space-y-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))] flex items-center justify-center">
-                            <Sparkles size={20} />
+                            <Info size={20} />
                         </div>
                         <h2 className="text-xl font-bold">AI-generated estimates</h2>
                     </div>

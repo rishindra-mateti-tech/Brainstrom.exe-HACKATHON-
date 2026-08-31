@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ProductRecommendation } from '@/lib/analysis/enhanced-analyzer';
-import { ChevronDown, ChevronUp, Sparkles, Lightbulb, AlertTriangle } from 'lucide-react';
+import { ChevronDown, ChevronUp, ThumbsUp, Lightbulb, AlertTriangle } from 'lucide-react';
 
 interface ProductRecommendationsProps {
     recommendations: ProductRecommendation[];
@@ -15,7 +15,7 @@ export function ProductRecommendations({ recommendations }: ProductRecommendatio
 
     const getIcon = (type: string) => {
         switch (type) {
-            case 'great': return <Sparkles size={20} className="text-green-600" />;
+            case 'great': return <ThumbsUp size={20} className="text-green-600" />;
             case 'consider': return <Lightbulb size={20} className="text-cyan-600" />;
             case 'missing': return <AlertTriangle size={20} className="text-orange-600" />;
             default: return <Lightbulb size={20} />;
@@ -40,10 +40,10 @@ export function ProductRecommendations({ recommendations }: ProductRecommendatio
             >
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[hsl(var(--primary))] flex items-center justify-center text-white">
-                        <Sparkles size={20} />
+                        <Lightbulb size={20} />
                     </div>
                     <div className="text-left">
-                        <h3 className="font-bold text-gray-900">💡 AI Product Recommendations</h3>
+                        <h3 className="font-bold text-gray-900">AI Product Recommendations</h3>
                         <p className="text-xs text-gray-600">
                             {isExpanded ? 'Click to collapse' : 'Click to see personalized suggestions'}
                         </p>

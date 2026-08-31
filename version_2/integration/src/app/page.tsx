@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/base';
-import { ArrowRight, ShieldCheck, Sparkles, Wind } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Leaf, ScanLine, Wind } from 'lucide-react';
 import * as Motion from 'framer-motion';
 import { motion } from 'framer-motion';
 
@@ -38,7 +38,7 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))] text-xs font-bold uppercase tracking-widest"
           >
-            <Sparkles className="w-3 h-3" />
+            <Leaf className="w-3 h-3" />
             AI-Powered Skincare Intelligence
           </motion.div>
 
@@ -82,7 +82,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-12">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--secondary)/0.1)] flex items-center justify-center text-[hsl(var(--secondary))]">
-                <Sparkles className="w-6 h-6" />
+                <ScanLine className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold">Ingredient OCR</h3>
               <p className="text-[hsl(var(--muted-foreground))]">

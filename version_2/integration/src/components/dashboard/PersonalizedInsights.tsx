@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { PersonalizedInsight } from '@/lib/analysis/enhanced-analyzer';
-import { CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { CheckCircle, AlertCircle } from 'lucide-react';
 
 interface PersonalizedInsightsProps {
     insights: PersonalizedInsight[];
@@ -20,7 +20,7 @@ export function PersonalizedInsights({ insights, extractedIngredients, skinType 
             {skinType && (
                 <div>
                     <h3 className="font-semibold text-gray-900 mb-3">
-                        💡 Personalized for Your {skinType.charAt(0).toUpperCase() + skinType.slice(1)} Skin
+                        Personalized for Your {skinType.charAt(0).toUpperCase() + skinType.slice(1)} Skin
                     </h3>
                     <div className="space-y-2">
                         {insights.map((insight, index) => (
