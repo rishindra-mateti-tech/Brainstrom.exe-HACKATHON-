@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Button, Card, Input } from '@/components/ui/base';
 import { Logo } from '@/components/ui/Logo';
+import { MeshBackground } from '@/components/ui/MeshBackground';
+import { trackSpotlight } from '@/lib/utils';
 import { extractIngredients } from '@/lib/analysis/ocr';
 import { analyzeIngredients, AnalysisResult } from '@/lib/analysis/analyzer';
 import {
@@ -201,9 +203,10 @@ export default function Dashboard() {
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
     return (
-        <div className={`min-h-screen ${isDark ? 'bg-gradient-to-br from-slate-900 to-blue-950' : 'bg-gray-50'} transition-colors duration-300`}>
+        <div className="min-h-screen transition-colors duration-300">
+            <MeshBackground />
             {/* Header */}
-            <nav className="border-b border-gray-200 dark:border-cyan-900 bg-white dark:bg-slate-900/95 sticky top-0 z-20 backdrop-blur-xl px-6 py-4 shadow-sm">
+            <nav className="glass sticky top-0 z-20 px-6 py-4">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <Logo />
@@ -245,7 +248,7 @@ export default function Dashboard() {
                 {/* Left: Analysis Tool */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* Goals Selector */}
-                    <Card className="border border-gray-200 dark:border-cyan-900 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 p-8 shadow-md dark:shadow-none hover:shadow-lg transition-all duration-300">
+                    <Card onMouseMove={trackSpotlight} className="glass spotlight-border p-8 hover:shadow-premium-lg hover:-translate-y-0.5 transition-all duration-300">
                         <GoalsSelector
                             key={resetToken}
                             profileId={profile?.id}
@@ -257,7 +260,7 @@ export default function Dashboard() {
                     </Card>
 
                     {/* Product Analysis */}
-                    <Card className="border border-gray-200 dark:border-cyan-900 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 p-8 shadow-md dark:shadow-none hover:shadow-lg transition-all duration-300">
+                    <Card onMouseMove={trackSpotlight} className="glass spotlight-border p-8 hover:shadow-premium-lg hover:-translate-y-0.5 transition-all duration-300">
                         <div className="flex items-center gap-3 mb-8">
                             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 dark:from-cyan-600 dark:to-blue-700 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform duration-300">
                                 <FlaskConical />
@@ -312,7 +315,7 @@ export default function Dashboard() {
                                         className="w-full min-h-[160px] rounded-2xl border border-gray-300 dark:border-cyan-800 bg-white dark:bg-slate-900 p-4 text-sm text-slate-800 dark:text-cyan-100 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-cyan-500"
                                     />
                                     <Button
-                                        className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white shadow-md border-0"
+                                        className="w-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))] hover:brightness-110 text-white shadow-premium border-0"
                                         onClick={handleStartAnalysis}
                                         disabled={analyzing || !pastedIngredients.trim()}
                                     >
@@ -376,7 +379,7 @@ export default function Dashboard() {
                                                     Change Photo
                                                 </Button>
                                                 <Button
-                                                    className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white shadow-md border-0"
+                                                    className="flex-1 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))] hover:brightness-110 text-white shadow-premium border-0"
                                                     onClick={handleStartAnalysis}
                                                     disabled={analyzing}
                                                 >
@@ -407,7 +410,7 @@ export default function Dashboard() {
                                     <div className="space-y-12">
                                         {/* ML Base Ingredient Analysis */}
                                         <div className="pt-2">
-                                            <h3 className="text-2xl font-black mb-6 flex items-center gap-3 text-purple-600 dark:text-purple-400 uppercase tracking-tighter">
+                                            <h3 className="text-2xl font-black mb-6 flex items-center gap-3 text-[hsl(var(--secondary))] uppercase tracking-tighter">
                                                 <Database size={28} />
                                                 Ingredient Analysis (Database)
                                             </h3>
@@ -416,17 +419,17 @@ export default function Dashboard() {
                                                     const statusColor = pred.is_prohibited ? 'text-red-700 bg-red-100 border-red-200' : pred.is_restricted ? 'text-amber-700 bg-amber-100 border-amber-200' : 'text-green-700 bg-green-100 border-green-200';
                                                     const statusText = pred.is_prohibited ? 'Prohibited' : pred.is_restricted ? 'Restricted' : 'Safe';
                                                     return (
-                                                        <div key={i} className="p-5 rounded-2xl bg-white dark:bg-slate-900/50 border border-purple-100 dark:border-purple-800/30 flex flex-col md:flex-row gap-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow">
+                                                        <div key={i} className="p-5 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border))] flex flex-col md:flex-row gap-6 shadow-premium hover:shadow-premium-lg transition-shadow">
                                                             <div className="flex-1 space-y-4">
                                                                 <div className="flex items-center flex-wrap gap-3">
                                                                     <h4 className="font-black text-lg text-slate-800 dark:text-slate-200 tracking-tight">{pred.inci_name}</h4>
                                                                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${statusColor}`}>Regulatory Status: {statusText}</span>
                                                                 </div>
-                                                                <div className="space-y-1.5 pt-1 border-t border-purple-50 dark:border-purple-900/30">
+                                                                <div className="space-y-1.5 pt-1 border-t border-[hsl(var(--border))]">
                                                                     <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Function</p>
                                                                     <div className="flex flex-wrap gap-1.5">
                                                                         {pred.predicted_functions.map((f, j) => (
-                                                                            <span key={j} className="text-[11px] font-mono bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 px-2 py-1 rounded border border-purple-100 dark:border-purple-800/30">{f}</span>
+                                                                            <span key={j} className="text-[11px] font-mono bg-[hsl(var(--secondary)/0.12)] text-[hsl(var(--secondary))] px-2 py-1 rounded border border-[hsl(var(--secondary)/0.25)]">{f}</span>
                                                                         ))}
                                                                     </div>
                                                                 </div>
@@ -464,7 +467,7 @@ export default function Dashboard() {
                                                     </div>
                                                     <div className="text-[1.1rem] leading-loose font-medium relative z-10 text-slate-800 dark:text-slate-200 space-y-6">
                                                         <p>
-                                                            Our database predictions indicate this product functions primarily as <span className="font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded-md">{(() => {
+                                                            Our database predictions indicate this product functions primarily as <span className="font-bold text-[hsl(var(--secondary))] bg-[hsl(var(--secondary)/0.1)] px-2 py-1 rounded-md">{(() => {
                                                                 const counts = result.mlPredictions?.flatMap(p => p.predicted_functions).reduce((acc, fn) => {
                                                                     const name = fn.toLowerCase();
                                                                     if (name !== 'unknown') {
@@ -537,7 +540,7 @@ export default function Dashboard() {
                             {history.map((item) => {
                                 const isExpanded = expandedHistoryId === item.id;
                                 return (
-                                    <Card key={item.id} className="bg-white dark:bg-slate-900/40 dark:backdrop-blur-sm hover:shadow-md dark:hover:shadow-cyan-500/20 dark:hover:border-cyan-500/60 transition-all duration-300 group border border-gray-200 dark:border-cyan-700/40 shadow-sm dark:shadow-cyan-500/10">
+                                    <Card key={item.id} className="hover:shadow-premium-lg hover:border-[hsl(var(--primary)/0.4)] transition-all duration-300 group">
                                         {/* Header - Always Visible */}
                                         <div className="flex justify-between items-start">
                                             <div>
@@ -612,7 +615,7 @@ export default function Dashboard() {
                 {/* Right: Skin Profile Summary */}
                 <div className="space-y-8">
                     {/* Profile Card */}
-                    <Card className="bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 p-8 overflow-hidden relative shadow-md dark:shadow-none border border-gray-200 dark:border-cyan-900 hover:shadow-lg transition-all duration-300">
+                    <Card onMouseMove={trackSpotlight} className="glass spotlight-border p-8 overflow-hidden relative hover:shadow-premium-lg transition-all duration-300">
                         <Droplet className="absolute -right-4 -top-4 w-24 h-24 opacity-10 text-pink-300 dark:text-cyan-600" />
                         <div className="relative z-10 space-y-6">
                             <div className="flex items-center gap-4">
@@ -639,7 +642,7 @@ export default function Dashboard() {
                     </Card>
 
                     {/* Memory Card */}
-                    <Card className="bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-blue-950 p-6 border border-gray-200 dark:border-cyan-900 shadow-md dark:shadow-none hover:shadow-lg transition-all duration-300">
+                    <Card onMouseMove={trackSpotlight} className="glass spotlight-border p-6 hover:shadow-premium-lg transition-all duration-300">
                         <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-cyan-200">
                             <Fingerprint size={18} className="text-pink-500 dark:text-cyan-400" /> Ingredient Memory
                         </h3>

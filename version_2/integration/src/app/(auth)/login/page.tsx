@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button, Input, Card } from '@/components/ui/base';
 import { Logo } from '@/components/ui/Logo';
-import { Mail } from 'lucide-react';
+import { Chrome } from 'lucide-react';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -69,7 +69,7 @@ export default function LoginPage() {
                 </p>
             </div>
 
-            <Card className="border shadow-lg overflow-hidden p-6">
+            <Card className="glass p-6">
                 <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-4">
                         <div className="space-y-2">
@@ -102,12 +102,12 @@ export default function LoginPage() {
                     </div>
 
                     {error && (
-                        <p className="text-sm font-medium text-red-500 bg-red-50 p-3 rounded-lg border border-red-100 animate-in fade-in">
+                        <p className="text-sm font-medium text-red-600 bg-red-500/10 p-3 rounded-lg border border-red-500/20 animate-in fade-in">
                             {error}
                         </p>
                     )}
                     {successMsg && (
-                        <p className="text-sm font-medium text-green-500 bg-green-50 p-3 rounded-lg border border-green-100 animate-in fade-in">
+                        <p className="text-sm font-medium text-emerald-600 bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20 animate-in fade-in">
                             {successMsg}
                         </p>
                     )}
@@ -121,14 +121,14 @@ export default function LoginPage() {
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t border-[hsl(var(--border))]" />
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-2 text-[hsl(var(--muted-foreground))]">Or continue with</span>
+                    <div className="relative flex justify-center text-xs uppercase tracking-widest">
+                        <span className="bg-[hsl(var(--card))] px-3 text-[hsl(var(--muted-foreground))]">Or continue with</span>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3">
                     <Button variant="outline" onClick={() => handleOAuth('google')} className="gap-2 w-full">
-                        <Mail className="w-4 h-4" /> Google
+                        <Chrome className="w-4 h-4" /> Continue with Google
                     </Button>
                 </div>
             </Card>

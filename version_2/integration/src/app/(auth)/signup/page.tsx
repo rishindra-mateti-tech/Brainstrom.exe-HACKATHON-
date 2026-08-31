@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button, Input, Card } from '@/components/ui/base';
 import { Logo } from '@/components/ui/Logo';
-import { Mail } from 'lucide-react';
+import { Chrome } from 'lucide-react';
 
 export default function SignupPage() {
     const router = useRouter();
@@ -75,7 +75,7 @@ export default function SignupPage() {
                 </p>
             </div>
 
-            <Card className="border shadow-lg">
+            <Card className="glass">
                 <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
                         <label className="text-sm font-medium" htmlFor="name">Full Name</label>
@@ -115,7 +115,7 @@ export default function SignupPage() {
                     </div>
 
                     {error && (
-                        <p className="text-sm font-medium text-red-500 bg-red-50 p-3 rounded-lg border border-red-100">
+                        <p className="text-sm font-medium text-red-600 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
                             {error}
                         </p>
                     )}
@@ -129,14 +129,14 @@ export default function SignupPage() {
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t border-[hsl(var(--border))]" />
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-2 text-[hsl(var(--muted-foreground))]">Or sign up with</span>
+                    <div className="relative flex justify-center text-xs uppercase tracking-widest">
+                        <span className="bg-[hsl(var(--card))] px-3 text-[hsl(var(--muted-foreground))]">Or sign up with</span>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3">
                     <Button variant="outline" className="gap-2 w-full" onClick={() => handleOAuth('google')}>
-                        <Mail className="w-4 h-4" /> Google
+                        <Chrome className="w-4 h-4" /> Continue with Google
                     </Button>
                 </div>
             </Card>
