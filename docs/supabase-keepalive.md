@@ -38,11 +38,15 @@ SQL editor, the real service-role key, and GitHub repository settings.
 2. Go to the GitHub repo's **Settings → Secrets and variables → Actions →
    New repository secret** and add:
    - `SUPABASE_URL` — same value as `NEXT_PUBLIC_SUPABASE_URL`.
-   - `SUPABASE_SERVICE_ROLE_KEY` — the **service_role** key from Supabase
-     project settings → API (not the anon key — the anon key can't write
-     past RLS, which is the whole reason the old read-only ping stopped
-     working). This key bypasses RLS, so keep it as a GitHub secret only;
-     never put it in client-side code or `NEXT_PUBLIC_*` env vars.
+   - `SUPABASE_SECRET_KEY` — the **secret key** (`sb_secret_...`) from
+     Supabase project settings → API Keys → Secret keys (the new-format
+     replacement for the legacy `service_role` key; not the `publishable`/
+     `anon` key — those can't write past RLS, which is the whole reason
+     the old read-only ping stopped working). This key bypasses RLS, so
+     keep it as a GitHub secret only; never put it in client-side code or
+     `NEXT_PUBLIC_*` env vars. New-format keys are sent only on the
+     `apikey` header, not `Authorization: Bearer` — see
+     [Supabase's API keys guide](https://supabase.com/docs/guides/api/api-keys).
    - The old `SUPABASE_ANON_KEY` secret is no longer used by this workflow
      and can be removed if nothing else references it.
 3. Confirm the workflow file is committed to the repository's **default
