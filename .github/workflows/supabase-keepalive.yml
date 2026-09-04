@@ -7,9 +7,12 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST API
+      - name: Write-ping Supabase (writes reset the auto-pause clock; reads don't)
         run: |
-          curl -sf -X GET \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/profiles?select=id&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          curl -sf -X POST \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/_keepalive?on_conflict=id" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: resolution=merge-duplicates" \
+            -d "{\"id\": 1, \"pinged_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
